@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.weahen.wstest">
+
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /> <!-- 允许应用程序改变WIFI连接状态 -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- 允许应用程序访问有关的网络信息 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 允许应用程序访问WIFI网卡的网络信息 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- 允许应用程序完全使用网络 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission
+        android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- 用于读取手机当前的状态 imei -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:hardwareAccelerated="false"
+        android:icon="@mipmap/launcherpicture"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.NoActionBar"
+        tools:replace="android:theme">
+        <activity android:name=".Activity.PicDisplayActivity"></activity>
+        <activity android:name=".Activity.HistoryActivity" />
+        <activity android:name=".Activity.WelcomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activity.MainActivity" />
+        <activity android:name=".Activity.MainActivity2" />
+        <activity android:name=".Activity.RefreshViewActivity" />
+        <activity android:name=".Activity.SlideActivity" />
+        <activity android:name=".Activity.FeedbackActivity" />
+        <activity android:name=".Activity.AboutActivity" />
+        <activity android:name=".Activity.SettingActivity" />
+        <activity android:name=".Activity.QRCodeActivity" />
+        <activity android:name=".Activity.MyNumberActivity" />
+        <activity android:name=".Activity.LoginActivity" />
+        <activity android:name=".Activity.BusinessNumberActivity" />
+        <activity android:name=".Activity.GiveNumberActivity" />
+        <activity android:name=".Activity.FunctionActivity" />
+        <activity android:name=".Activity.BusinessNumber2Activity" />
+        <activity android:name=".Activity.PersonalizedActivity" />
+        <activity android:name=".Activity.ChangeHeadImageActivity"></activity>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.weahen.wstest"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <activity android:name=".Activity.ShowImageActivity" />
+    </application>
+
+</manifest>

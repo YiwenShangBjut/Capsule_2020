@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <group android:checkableBehavior="single">
+
+        <item
+
+            android:id="@+id/introduce"
+
+            android:icon="@drawable/ic_menu_slideshow"
+
+            android:title="软件介绍" />
+
+        <item
+
+            android:id="@+id/service"
+
+            android:icon="@drawable/ic_menu_share"
+
+            android:title="服务与支持" />
+
+        <item
+
+            android:id="@+id/checkupdate"
+
+            android:icon="@drawable/ic_menu_camera"
+
+            android:title="检查更新" />
+
+        <item
+
+            android:id="@+id/set"
+
+            android:icon="@drawable/ic_menu_manage"
+
+            android:title="设置" />
+
+    </group>
+
+
+
+    <item android:title="其他">
+
+        <menu>
+
+            <item
+
+                android:id="@+id/QRCode"
+
+                android:icon="@drawable/ic_menu_gallery"
+
+                android:title="软件二维码" />
+
+            <item
+
+                android:id="@+id/nav_send"
+
+                android:icon="@drawable/ic_menu_send"
+
+                android:title="给我们发邮件" />
+
+        </menu>
+
+    </item>
+
+
+
+</menu>

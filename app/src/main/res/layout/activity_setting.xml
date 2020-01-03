@@ -1,0 +1,111 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+   >
+
+    <include layout="@layout/layout_head_back_title"/>
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
+
+    <!--<TextView-->
+
+        <!--android:layout_width="120dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="声 音"-->
+        <!--android:textSize="20dp"-->
+        <!--android:padding="10dp"/>-->
+
+    <!--<RadioGroup-->
+
+        <!--android:id="@+id/rg_1"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal"-->
+       <!--&gt;-->
+
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/rb_1"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="开"-->
+            <!--android:textSize="25dp"-->
+            <!--android:padding="10dp"-->
+            <!--android:textColor="#FF6600" />-->
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/rb_2"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="关"-->
+            <!--android:textSize="25dp"-->
+            <!--android:padding="10dp"-->
+            <!--android:textColor="#FF6600"-->
+            <!--/>-->
+
+    <!--</RadioGroup>-->
+
+
+    <!--</LinearLayout>-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
+
+    <!--<TextView-->
+
+        <!--android:layout_width="120dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text= "语 言"-->
+        <!--android:textSize="20dp"-->
+        <!--android:padding="10dp"/>-->
+
+    <!--<RadioGroup-->
+
+        <!--android:id="@+id/rg_2"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal"-->
+        <!--&gt;-->
+
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/rb_3"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="中"-->
+            <!--android:textSize="25dp"-->
+            <!--android:padding="10dp"-->
+            <!--android:textColor="#FF6600"-->
+
+            <!--/>-->
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/rb_4"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="英"-->
+            <!--android:textSize="25dp"-->
+            <!--android:padding="10dp"-->
+            <!--android:textColor="#FF6600"-->
+            <!--/>-->
+
+    <!--</RadioGroup>-->
+
+    <!--</LinearLayout>-->
+
+
+
+
+</LinearLayout>
