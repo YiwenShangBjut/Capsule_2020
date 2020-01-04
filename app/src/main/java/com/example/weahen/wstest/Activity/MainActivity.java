@@ -100,9 +100,7 @@ MainActivity是从functionActivity来的
  */
 public class MainActivity extends BaseActivity   {
     RefreshableView refreshableView;
-
     private com.example.weahen.wstest.widget.CircleImageView avatar;
-
     ImageView imageView;
     private float beforeScale=1.0f;
     private float nowScale;
