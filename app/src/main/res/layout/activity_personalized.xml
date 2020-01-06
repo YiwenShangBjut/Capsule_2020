@@ -2,81 +2,107 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
     <include layout="@layout/layout_head_back_title" />
+    <LinearLayout
+        android:id="@+id/firstLinearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10sp"
+            android:paddingRight="10sp"
+            android:textColor="#090909"
+            android:text="头像"
+            android:textSize="20sp"/>
+        <com.example.weahen.wstest.widget.CircleImageView
+            android:id="@+id/myHeadImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentLeft="true"
+            android:scaleType="centerInside" />
+    </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearTop"
+        android:id="@+id/secondLinearlayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="60dp"
-        android:orientation="horizontal">
-
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/firstLinearlayout">
         <TextView
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="请输入昵称"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textColor="#090909"
+            android:text="昵称"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/myTextViewOfName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#090909"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/relativeTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:layout_below="@+id/firstLinearlayout"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="修改昵称:"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:textSize="20sp" />
 
         <EditText
             android:id="@+id/etNick"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
+            android:layout_height="wrap_content"
+            android:lines="1"
+            />
     </LinearLayout>
 
-
     <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_below="@+id/relativeTop"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="150dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
-
         <TextView
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="修改头像："
+            android:text="修改头像"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:textSize="20sp" />
-
         <Button
             android:id="@+id/btn_chooseHeadImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="btnClick"
             android:text="选择头像" />
-
     </LinearLayout>
 
-    <!--<ImageView-->
-    <!--android:layout_centerInParent="true"-->
-    <!--android:id="@+id/iv_avatar"-->
-    <!--android:layout_marginTop="20dp"-->
-    <!--android:layout_width="240dp"-->
-    <!--android:layout_height="240dp" />-->
-
-
-    <LinearLayout
+    <Button
+        android:id="@+id/sure"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-
-
-        <!--<Button-->
-        <!--android:onClick="btnClick"-->
-        <!--android:text="拍照或从相册选择"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/ChoseTX"/>-->
-
-        <Button
-            android:id="@+id/sure"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="确定" />
-    </LinearLayout>
-
-
+        android:text="确定"
+        android:layout_marginTop="40sp"
+        android:layout_below="@+id/linearLayout"/>
 </RelativeLayout>
+
+

@@ -141,7 +141,6 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 }
 
                 try {
-                    getRoomList();
                     SQLiteDatabase dbw = myDbHelper.getWritableDatabase();
                     JSONArray been = new JSONArray(json);
                     for (int i = 0; i < been.length(); i++) {
@@ -291,6 +290,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         //chatContentDao= MyApplication.getInstances().getDaoSession().getChatContentDao();
        // chatContents = chatContentDao.loadAll();
 
+        getRoomList();
+
 
         }
 
@@ -363,6 +364,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     }
 
     public void showHistoryDialog(){
+        Log.e("SlideActivity","roomList has "+roomNameList.size());
         View view=View.inflate(SlideActivity.this, R.layout.history_listview, null);
         lvContacts = (ListView) view.findViewById(R.id.history_contacts);
 

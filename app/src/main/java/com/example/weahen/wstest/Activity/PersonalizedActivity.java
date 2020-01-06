@@ -21,16 +21,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.weahen.wstest.BaseActivity;
 import com.example.weahen.wstest.R;
 import com.example.weahen.wstest.Utils.MyConstant;
+import com.example.weahen.wstest.Utils.NetworkUtility;
 import com.example.weahen.wstest.Utils.SharedPreferencesUtil;
+import com.example.weahen.wstest.widget.CircleImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.List;
 
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -38,7 +42,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 
 public class PersonalizedActivity extends BaseActivity {
-
+    private static final String TAG = "PersonalizedActivity";
     private Context mContext;
     private AlertDialog profilePictureDialog;
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
@@ -46,222 +50,144 @@ public class PersonalizedActivity extends BaseActivity {
     private static final int REQUEST_PERMISSION_CAMERA = 0x001;
     private static final int REQUEST_PERMISSION_WRITE = 0x002;
     private static final int CROP_REQUEST_CODE = 0x003;
-
     private ImageView ivAvatar;
-
-    /**
-     * 文件相关
-     */
-    private File captureFile;
-    private File rootFile;
-    private File cropFile;
     private EditText etNick;
-
+    private String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personalized);
-
-
-
+        Log.e("Tag",TAG+"onCreate");
         initTitle("个性化设置");
+        initUid();
+        //初始化我的头像
+        initImage();
+        //初始化我的昵称
+        initName();
 
         mContext = this;
-
-//        ivAvatar = findViewById(R.id.iv_avatar);
-
-        rootFile = new File(MyConstant.PIC_PATH);
-        if (!rootFile.exists()) {
-            rootFile.mkdirs();
-        }
-        Button btnchangeheadimage=findViewById(R.id.btn_chooseHeadImage);
-        btnchangeheadimage.setOnClickListener(new View.OnClickListener(){
+        Button btnchangeheadimage = findViewById(R.id.btn_chooseHeadImage);
+        btnchangeheadimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PersonalizedActivity.this,ChangeHeadImageActivity.class));
+                startActivity(new Intent(PersonalizedActivity.this, ChangeHeadImageActivity.class));
             }
         });
-        etNick = findViewById(R.id.etNick);
+
         Button btnOk = findViewById(R.id.sure);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-         //       SharedPreferencesUtil sp = new SharedPreferencesUtil(PersonalizedActivity.this.getApplicationContext());
-          //      sp.writeData("nick", etNick.getText().toString());
+                //       SharedPreferencesUtil sp = new SharedPreferencesUtil(PersonalizedActivity.this.getApplicationContext());
+                //      sp.writeData("nick", etNick.getText().toString());
                 SharedPreferences.Editor editor = getSharedPreferences("id", MODE_PRIVATE).edit();
-                editor.putString("id",etNick.getText().toString());
-                editor.apply();
-
-                Toast.makeText(PersonalizedActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+                if (etNick.getText().toString().trim().length() == 0 || etNick.getText().toString().trim().length() >= 10) {
+                    Log.e("Tag1", "personalizationg 输入框的输入  " + etNick.getText().toString());
+                    etNick.setText("");
+                    Toast.makeText(PersonalizedActivity.this, R.string.name_cant_empty, Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("Tag1", "personalizationg 输入框的输入  " + etNick.getText().toString());
+                    editor.putString("id", etNick.getText().toString().trim());
+                    editor.apply();
+                    initName();
+                    Toast.makeText(PersonalizedActivity.this, R.string.btn_save_ok, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
             }
         });
     }
 
-
-    public void btnClick(View view) {
-
-        if (profilePictureDialog == null) {
-            @SuppressLint("InflateParams") View rootView = LayoutInflater.from(this).inflate(R.layout.item_profile_picture, null);
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            rootView.findViewById(R.id.tv_take_photo).setOnClickListener(onTakePhotoListener);
-            rootView.findViewById(R.id.tv_choose_photo).setOnClickListener(onChoosePhotoListener);
-            builder.setView(rootView);
-            profilePictureDialog = builder.create();
-            profilePictureDialog.show();
-        } else {
-            profilePictureDialog.show();
-        }
+    private void initImage() {
+        CircleImageView myHeadImage = findViewById(R.id.myHeadImage);
+        SharedPreferences myimage = getSharedPreferences("MyChange", MODE_PRIVATE);
+        int i = myimage.getInt("MyChange", 2131230974);
+        myHeadImage.setImageResource(i);
     }
 
-    private void dismissProfilePictureDialog() {
-        if (profilePictureDialog != null && profilePictureDialog.isShowing()) {
-            profilePictureDialog.dismiss();
-        }
-    }
-
-    private View.OnClickListener onTakePhotoListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            dismissProfilePictureDialog();
-            if (EasyPermissions.hasPermissions(mContext, PERMISSION_CAMERA, PERMISSION_WRITE)) {
-                takePhoto();
-            } else {
-                EasyPermissions.requestPermissions(PersonalizedActivity.this, "need camera permission", REQUEST_PERMISSION_CAMERA, PERMISSION_CAMERA, PERMISSION_WRITE);
-            }
-        }
-    };
-
-    //拍照
-    private void takePhoto() {
-        //用于保存调用相机拍照后所生成的文件
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return;
-        }
-        captureFile = new File(rootFile, "temp.jpg");
-        //跳转到调用系统相机
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //判断版本 如果在Android7.0以上,使用FileProvider获取Uri
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(mContext, getPackageName(), captureFile);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
-        } else {
-            //否则使用Uri.fromFile(file)方法获取Uri
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(captureFile));
-        }
-        startActivityForResult(intent, REQUEST_PERMISSION_CAMERA);
-    }
-
-    private View.OnClickListener onChoosePhotoListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            dismissProfilePictureDialog();
-            if (EasyPermissions.hasPermissions(mContext, PERMISSION_WRITE)) {
-                choosePhoto();
-            } else {
-                EasyPermissions.requestPermissions(PersonalizedActivity.this, "need camera permission", REQUEST_PERMISSION_WRITE, PERMISSION_WRITE);
-            }
-        }
-    };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    private void initName() {
+        etNick = findViewById(R.id.etNick);
+        TextView myName = findViewById(R.id.myTextViewOfName);
+        SharedPreferences preName = getSharedPreferences("id", MODE_PRIVATE);
+        String t = preName.getString("id", uid.substring(0, 5));
+        myName.setText(t);
     }
 
 
-    //从相册选择
-    private void choosePhoto() {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, REQUEST_PERMISSION_WRITE);
-    }
-
-
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-        if (requestCode == REQUEST_PERMISSION_CAMERA) {
-            takePhoto();
-        } else if (requestCode == REQUEST_PERMISSION_WRITE) {
-            choosePhoto();
-        }
-    }
-
-    /**
-     * 裁剪图片
-     */
-    private void cropPhoto(Uri uri) {
-        cropFile = new File(rootFile, "avatar.jpg");
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("crop", "true");
-        intent.putExtra("aspectX", 1);//默认图片剪裁起始位置x值
-        intent.putExtra("aspectY", 1);//默认图片剪裁起始位置y值
-        intent.putExtra("outputX", 300);//默认图片剪裁终止位置x值
-        intent.putExtra("outputY", 300);//默认图片剪裁终止位置y值
-        intent.putExtra("return-data", false);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(cropFile));
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString());
-        intent.putExtra("noFaceDetection", true);
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, CROP_REQUEST_CODE);
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_PERMISSION_CAMERA:
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        Uri contentUri = FileProvider.getUriForFile(mContext, getPackageName(), captureFile);
-                        cropPhoto(contentUri);
-                    } else {
-                        cropPhoto(Uri.fromFile(captureFile));
-                    }
-                    break;
-                case REQUEST_PERMISSION_WRITE:
-                    cropPhoto(data.getData());
-                    break;
-                case CROP_REQUEST_CODE:
-                    saveImage(cropFile.getAbsolutePath());
-                    ivAvatar.setImageBitmap(BitmapFactory.decodeFile(cropFile.getAbsolutePath()));
-                    break;
-                default:
-                    break;
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-
-    /**
-     * @param path
-     * @return
-     */
-    public String saveImage(String path) {
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return null;
-        }
-        Bitmap bitmap = BitmapFactory.decodeFile(path);
+    private void initUid() {         //本机IMEI
+        String MYIMEI = NetworkUtility.getIMEI(PersonalizedActivity.this);
         try {
-            FileOutputStream fos = new FileOutputStream(cropFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-            return cropFile.getAbsolutePath();
-        } catch (IOException e) {
+            uid = shaEncode(MYIMEI);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
     }
 
+    //对imei用SHA算法加密
+    public static String shaEncode(String inStr) throws Exception {
 
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            new AppSettingsDialog.Builder(this).build().show();
+        MessageDigest sha = null;
+
+        try {
+            sha = MessageDigest.getInstance("SHA");
+        } catch (Exception e) {
+
+            System.out.println(e.toString());
+
+            e.printStackTrace();
+
+            return "";
         }
+
+        byte[] byteArray = inStr.getBytes("UTF-8");
+        byte[] md5Bytes = sha.digest(byteArray);
+        StringBuffer hexValue = new StringBuffer();
+
+        for (int i = 0; i < md5Bytes.length; i++) {
+
+            int val = ((int) md5Bytes[i]) & 0xff;
+
+            if (val < 16) {
+
+                hexValue.append("0");
+            }
+
+            hexValue.append(Integer.toHexString(val));
+
+        }
+
+        return hexValue.toString();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("Tag",TAG+"onDestroy");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("Tag",TAG+"onStart");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e("Tag",TAG+"onRestart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initImage();
+        Log.e("Tag",TAG+"onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("Tag",TAG+"onPause");
     }
 }

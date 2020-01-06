@@ -99,9 +99,9 @@ import ua.naiksoftware.stomp.StompClient;
 MainActivity是从functionActivity来的
  */
 public class MainActivity extends BaseActivity   {
+    private boolean enter;
     RefreshableView refreshableView;
     private com.example.weahen.wstest.widget.CircleImageView avatar;
-
     ImageView imageView;
     private float beforeScale=1.0f;
     private float nowScale;
@@ -192,13 +192,18 @@ public class MainActivity extends BaseActivity   {
                 Log.e("10秒获取mac", macNowR2);
 
           //      Log.e("manNow在result里面吗", getMacresult.contains(macNowR2) + "");
-                if (!getMacresult.contains(macNowR2)) {
+                if (!getMacresult.contains(macNowR2)&&!enter) {
                     try {
+                        Log.e("Handler","now enter is true, no dialog" );
                         showDialog2();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
+                }
+                if(getMacresult.contains(macNowR2)){
+                    Log.e("Handler","now enter is false");
+                    enter=false;
                 }
 
 
@@ -212,7 +217,9 @@ public class MainActivity extends BaseActivity   {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("MainActivity","onCreate");
         setContentView(R.layout.activity_main);
+        enter=true;
 
         SharedPreferencesUtil sp = new SharedPreferencesUtil(MainActivity.this.getApplicationContext());
         nick = sp.readData("nick", "");
@@ -673,6 +680,43 @@ public class MainActivity extends BaseActivity   {
 
 
     }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.e("MainActivity","onDestroy");
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        Log.e("MainActivity","onResume");
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        Log.e("MainActivity","onStop");
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.e("MainActivity","onPause");
+    }
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        Log.e("MainActivity","onRestart");
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        Log.e("MainActivity","onStart");
+    }
+
     private boolean stringExist(String sc,ArrayList<String> list){
         for(String i:list){
             if(i.equals(sc)){

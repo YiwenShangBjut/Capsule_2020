@@ -77,5 +77,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">个性化设置</string>
     <string name="shake_tip_err">什么都没摇到</string>
+    <string name="name_cant_empty">违规昵称，请重新输入！</string>
+    <string name="btn_save_ok">修改成功</string>>
 
 </resources>
