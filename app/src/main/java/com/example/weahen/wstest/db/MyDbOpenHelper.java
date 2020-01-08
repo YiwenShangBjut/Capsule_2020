@@ -132,7 +132,7 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
             Log.e(TAG,"Error on insert room data: "+e.toString());
         }finally{
             if(null!=database){
-                database.close();
+
             }
         }
     }

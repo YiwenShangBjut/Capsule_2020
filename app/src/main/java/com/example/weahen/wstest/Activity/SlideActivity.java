@@ -1,5 +1,6 @@
 package com.example.weahen.wstest.Activity;
 
+import static com.example.weahen.wstest.db.DBContract.ChatEntry.TABLE_NAME_CHAT;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
@@ -70,6 +71,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -116,6 +118,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
     String startTime;
     String endTime;
+
+    ArrayAdapter<ChatRoom> adapter;
 
     private ScreenUtils utils;
     public static String NAME = "";          //连接WiFi名称
@@ -180,6 +184,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                             contentValues.put(COLUMN_NAME_ENDTIME, endTime);
 
                             myDbHelper.insertRoomData(contentValues, dbw);
+                            getRoomList();
                         }
 
                     }
@@ -386,13 +391,34 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         cursor.close();
     }
 
+    private void showDeleteDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(SlideActivity.this);
+        builder.setTitle("删除此聊天室");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                chatRoomList.remove(position);
+                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+                adapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
+    }
+
 
 
     public void showHistoryDialog(){
         View view=View.inflate(SlideActivity.this, R.layout.history_listview, null);
         lvContacts = (ListView) view.findViewById(R.id.history_contacts);
 
-        ArrayAdapter<ChatRoom> adapter = new ArrayAdapter<ChatRoom>(this, R.layout.history_listview, chatRoomList) {
+        adapter = new ArrayAdapter<ChatRoom>(this, R.layout.history_listview, chatRoomList) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -423,6 +449,14 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 historyDialog.dismiss();
                 startActivity(intent);
                // clickedRoom=chatContents.get(position);
+            }
+        });
+
+        lvContacts.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                showDeleteDialog(position);
+                return true;
             }
         });
 
