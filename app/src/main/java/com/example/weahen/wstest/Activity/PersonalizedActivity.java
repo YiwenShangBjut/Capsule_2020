@@ -83,17 +83,25 @@ public class PersonalizedActivity extends BaseActivity {
                 //      sp.writeData("nick", etNick.getText().toString());
                 SharedPreferences.Editor editor = getSharedPreferences("id", MODE_PRIVATE).edit();
                 if (etNick.getText().toString().trim().length() == 0 || etNick.getText().toString().trim().length() >= 10) {
-                    Log.e("Tag1", "personalizationg 输入框的输入  " + etNick.getText().toString());
+                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
                     etNick.setText("");
                     Toast.makeText(PersonalizedActivity.this, R.string.name_cant_empty, Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.e("Tag1", "personalizationg 输入框的输入  " + etNick.getText().toString());
+                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
                     editor.putString("id", etNick.getText().toString().trim());
                     editor.apply();
                     initName();
                     Toast.makeText(PersonalizedActivity.this, R.string.btn_save_ok, Toast.LENGTH_SHORT).show();
                     finish();
                 }
+            }
+        });
+
+        Button back=findViewById(R.id.back);
+        back.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }

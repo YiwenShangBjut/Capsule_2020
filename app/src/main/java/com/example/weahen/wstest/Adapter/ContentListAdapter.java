@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class ContentListAdapter extends BaseAdapter implements View.OnClickListener {
@@ -48,6 +50,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
     Content m;
     ImageView imageView;
+
     Uri uri;
     private ImageInfoObj imageInfoObj;
     private ImageWidgetInfoObj imageWidgetInfoObj;
@@ -86,8 +89,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
-
-        Log.e("ContentListAdapter","on position "+position+" isSelf is "+contentItems.get(position).isSelf());
+        Log.e("ContentListAdapter", "on position " + position + " isSelf is " + contentItems.get(position).isSelf());
         // 识别消息发送方
         if (contentItems.get(position).isSelf()) {
             // message belongs to you, so load the right aligned layout
@@ -106,18 +108,18 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
             } else {
                 convertView = mInflater.inflate(R.layout.list_item_message_right, null);
+
                 TextView txtMsg = convertView.findViewById(R.id.txtMsg);
                 txtMsg.setText(m.getContent());
             }
         } else {
             if (contentItems.get(position).isPicture()) {
                 convertView = mInflater.inflate(R.layout.item_image_receive, null);
+
+
                 imageView = convertView.findViewById(R.id.bivPic);
                 imageView.setImageBitmap(m.getPicture());
-//                init();
-//                imageView.setOnClickListener(this);
 
-//
             } else {
                 // message belongs to other person, load the left aligned layout
                 convertView = mInflater.inflate(R.layout.list_item_message_left, null);
@@ -128,21 +130,31 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
             }
         }
 
+
+
         TextView txtlblMsgFrom = convertView.findViewById(R.id.lblMsgFrom);
         txtlblMsgFrom.setText(m.getUserName());
-        CircleImageView imageSend=convertView.findViewById(R.id.chat_item_header);
-        Log.e("Tag1","MainActivity.sendHeadImage"+m.getHeadImage());
+        CircleImageView imageSend = convertView.findViewById(R.id.chat_item_header);
+        Log.e("Tag1", "MainActivity.sendHeadImage" + m.getHeadImage());
 
-        int i=Integer.parseInt(m.getHeadImage());
-        Log.e("Tag1","i"+i);
+        int i = Integer.parseInt(m.getHeadImage());
+        Log.e("Tag1", "i" + i);
         imageSend.setImageResource(i);
-
-//        TextView txtTime = convertView.findViewById(R.id.time);
-//        txtTime.setText(m.getTime());
+//显示时间
+        TextView txtTime = convertView.findViewById(R.id.getCurrentTime);
+        txtTime.setText(m.getTime());
 
 
         return convertView;
     }
+//    private String getTime(){
+//
+//        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+//        Date curDate = new Date(System.currentTimeMillis());
+////获取当前时间
+//        String str = formatter.format(curDate);
+//        return str;
+//    }
 
     private void init() {
 

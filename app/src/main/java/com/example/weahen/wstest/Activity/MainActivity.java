@@ -11,6 +11,7 @@ import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_ISPI
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_ISSELF;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_PICTURE;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_UID;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -41,6 +42,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -98,12 +101,12 @@ import ua.naiksoftware.stomp.StompClient;
 /*
 MainActivity是从functionActivity来的
  */
-public class MainActivity extends BaseActivity   {
+public class MainActivity extends BaseActivity {
     private boolean enter;
     RefreshableView refreshableView;
     private com.example.weahen.wstest.widget.CircleImageView avatar;
     ImageView imageView;
-    private float beforeScale=1.0f;
+    private float beforeScale = 1.0f;
     private float nowScale;
     private static Bitmap bm;
     private static ImageView iv;
@@ -118,7 +121,7 @@ public class MainActivity extends BaseActivity   {
     private ContentListAdapter adapter2;
 
     private StompClient mStompClient;
-
+    String time;
     int id;
     String name, path;
     String uid;
@@ -128,7 +131,7 @@ public class MainActivity extends BaseActivity   {
 
     private Timer timer;
 
-    String getMacresult="";
+    String getMacresult = "";
     String uploadfile_result;
     File file;//上传的图片
     String pictureName;//下载的图片名
@@ -136,11 +139,11 @@ public class MainActivity extends BaseActivity   {
     String RecevierUID;
     boolean isSelf;
     boolean isPicture;
-
+    String currTime;
     String online;
-    String time;
-   String headImage;
-   String userName;
+
+    String headImage;
+    String userName;
     private ImageInfoObj imageInfoObj;
     private ImageWidgetInfoObj imageWidgetInfoObj;
     private AlertDialog picSelectDialog;
@@ -172,13 +175,13 @@ public class MainActivity extends BaseActivity   {
     private Handler handlerRecv = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-        //    Content c = new Content(nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, (Bitmap) msg.obj, isSelf, isPicture,headImage,userName);
-            Content c = new Content(uid, (Bitmap) msg.obj, isSelf, isPicture,headImage,userName);
-            String path= storePic((Bitmap) msg.obj);
-            Log.e("Main","handle Message: store a pic into db");
-            Log.e("Main","path is "+path);
+            //    Content c = new Content(nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, (Bitmap) msg.obj, isSelf, isPicture,headImage,userName);
+            Content c = new Content(currTime, uid, (Bitmap) msg.obj, isSelf, isPicture, headImage, userName);
+            String path = storePic((Bitmap) msg.obj);
+            Log.e("Main", "handle Message: store a pic into db");
+            Log.e("Main", "path is " + path);
             store2Db(c, path);
-         //   chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), pictureName, true, name));
+            //   chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), pictureName, true, name));
         }
     };
 
@@ -191,35 +194,35 @@ public class MainActivity extends BaseActivity   {
                 String macNowR2 = macNowR1.toUpperCase();//转成大写
                 Log.e("10秒获取mac", macNowR2);
 
-          //      Log.e("manNow在result里面吗", getMacresult.contains(macNowR2) + "");
-                if (!getMacresult.contains(macNowR2)&&!enter) {
+                //      Log.e("manNow在result里面吗", getMacresult.contains(macNowR2) + "");
+                if (!getMacresult.contains(macNowR2) && !enter) {
                     try {
-                        Log.e("Handler","now enter is true, no dialog" );
+                        Log.e("Handler", "now enter is true, no dialog");
                         showDialog2();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                 }
-                if(getMacresult.contains(macNowR2)){
-                    Log.e("Handler","now enter is false");
-                    enter=false;
+                if (getMacresult.contains(macNowR2)) {
+                    Log.e("Handler", "now enter is false");
+                    enter = false;
                 }
 
 
             }
         }
     };
-  //  private ChatContentDao chatContentDao;
+    //  private ChatContentDao chatContentDao;
     private String nick;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("MainActivity","onCreate");
+        Log.e("MainActivity", "onCreate");
         setContentView(R.layout.activity_main);
-        enter=true;
+        enter = true;
 
         SharedPreferencesUtil sp = new SharedPreferencesUtil(MainActivity.this.getApplicationContext());
         nick = sp.readData("nick", "");
@@ -238,7 +241,7 @@ public class MainActivity extends BaseActivity   {
         path = bundle.getString("path");
         id = bundle.getInt("id");
         field = bundle.getString("field");
-        Log.e("MainActivity","Id recevied by main is "+id);
+        Log.e("MainActivity", "Id recevied by main is " + id);
 
         new os().start();
 
@@ -294,21 +297,56 @@ public class MainActivity extends BaseActivity   {
 
         SharedPreferences idpre = getSharedPreferences("id", MODE_PRIVATE);
 
-       String t= idpre.getString("id",uid.substring(0,5));
-       Log.e("Tag1","main中拼接前键值对中的值  "+t);
-        uid=uid+idpre.getString("id",uid.substring(0,5));
-        Log.e("Tag1","main中拼接后uid的值  "+uid);
-        btnSend.setOnClickListener(new View.OnClickListener() {
+        String t = idpre.getString("id", uid.substring(0, 5));
+        Log.e("Tag1", "main中拼接前键值对中的值  " + t);
+        uid = uid + idpre.getString("id", uid.substring(0, 5));
+        Log.e("Tag1", "main中拼接后uid的值  " + uid);
+        //设置发送按钮的点击状态和事件
+        btnSend.setEnabled(false);
+        TextWatcher textWatcher = new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                time=String.valueOf(new Date().getTime());
-                mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(mac, name, path, id, uid, inputMsg.getText().toString())).subscribe();
-                Log.e("btnSendOnClick", utils.getSendMessageJSON(mac, name, path, id, uid, inputMsg.getText().toString()));
-
-                inputMsg.setText("");
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
-        });
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                btnSend.setEnabled(false);
+                if (inputMsg.getText().toString().trim().length() > 0) {
+                    btnSend.setEnabled(true);
+                    btnSend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            time = String.valueOf(new Date().getTime());
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString())).subscribe();
+                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString()));
+
+                            inputMsg.setText("");
+
+                        }
+                    });
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        };
+        inputMsg.addTextChangedListener(textWatcher);
+
+//        btnSend.setOnClickListener(new View.OnClickListener() {
+//             @Override
+//             public void onClick(View v) {
+//                 time = String.valueOf(new Date().getTime());
+//                 mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString())).subscribe();
+//                 Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString()));
+//
+//                 inputMsg.setText("");
+//
+//             }
+//         });
 
 
         listContent = new ArrayList<Content>();
@@ -328,7 +366,7 @@ public class MainActivity extends BaseActivity   {
                 Log.e("Click", "ContentLisAdapter onClick, position is" + i + "------------------------------------");
                 //判断点击类型
                 clickedItem = listContent.get(i);
-                clickedItemPosition=i;
+                clickedItemPosition = i;
                 if (clickedItem.isPicture()) {
                     if (picSelectDialog == null) {
                         @SuppressLint("InflateParams") View rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_pic_dialog, null);
@@ -342,7 +380,7 @@ public class MainActivity extends BaseActivity   {
                     } else {
                         picSelectDialog.show();
                     }
-                }else{
+                } else {
                     if (textSelectDialog == null) {
                         @SuppressLint("InflateParams") View rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_dialog, null);
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -486,19 +524,22 @@ public class MainActivity extends BaseActivity   {
 //            }
 //        }).start();
     }
+
     private void dismissTextSelectDialog() {
         if (textSelectDialog != null && textSelectDialog.isShowing()) {
             textSelectDialog.dismiss();
         }
     }
+
     private View.OnClickListener onDeleteTextListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             dismissTextSelectDialog();
-            showDeleteDialog(clickedItem.getShaCode(),clickedItemPosition);
+            showDeleteDialog(clickedItem.getShaCode(), clickedItemPosition);
         }
     };
-    private void showDeleteDialog (String shaCode,int position){
+
+    private void showDeleteDialog(String shaCode, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("删除此聊天会话");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -525,6 +566,7 @@ public class MainActivity extends BaseActivity   {
             picSelectDialog.dismiss();
         }
     }
+
     private View.OnClickListener onShowPhotoListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -532,28 +574,28 @@ public class MainActivity extends BaseActivity   {
 //            avatar=listViewMessages.findViewById(R.id.chat_item_header);
 //            avatar.setImageResource(R.drawable.a1);
 
-                imageView = listViewMessages.findViewById(R.id.bivPic);
-              //  bm = clickedItem.getPicture();
-                String shacode=clickedItem.getShaCode();
+            imageView = listViewMessages.findViewById(R.id.bivPic);
+            //  bm = clickedItem.getPicture();
+            String shacode = clickedItem.getShaCode();
 
-                String picPath= myDbHelper.getPicPath(shacode);
-                //imageView.setImageBitmap(bm);
+            String picPath = myDbHelper.getPicPath(shacode);
+            //imageView.setImageBitmap(bm);
 
-                imageInfoObj = new ImageInfoObj();
-                // imageInfoObj.imageUrl = uri.toString();
-                imageInfoObj.imageWidth = 1280;
-                imageInfoObj.imageHeight = 720;
+            imageInfoObj = new ImageInfoObj();
+            // imageInfoObj.imageUrl = uri.toString();
+            imageInfoObj.imageWidth = 1280;
+            imageInfoObj.imageHeight = 720;
 
-                imageWidgetInfoObj = new ImageWidgetInfoObj();
-                imageWidgetInfoObj.x = imageView.getLeft();
-                imageWidgetInfoObj.y = imageView.getTop();
-                imageWidgetInfoObj.width = imageView.getLayoutParams().width;
-                imageWidgetInfoObj.height = imageView.getLayoutParams().height;
+            imageWidgetInfoObj = new ImageWidgetInfoObj();
+            imageWidgetInfoObj.x = imageView.getLeft();
+            imageWidgetInfoObj.y = imageView.getTop();
+            imageWidgetInfoObj.width = imageView.getLayoutParams().width;
+            imageWidgetInfoObj.height = imageView.getLayoutParams().height;
 
-               // showImageDialog(bm);
-                Intent intent=new Intent(MainActivity.this,PicDisplayActivity.class);
-                intent.putExtra("picPath", picPath);
-                startActivity(intent);
+            // showImageDialog(bm);
+            Intent intent = new Intent(MainActivity.this, PicDisplayActivity.class);
+            intent.putExtra("picPath", picPath);
+            startActivity(intent);
         }
     };
     private View.OnClickListener onSavePhotoListener = new View.OnClickListener() {
@@ -561,9 +603,9 @@ public class MainActivity extends BaseActivity   {
         public void onClick(View v) {
             dismissPicSelectDialog();
 
-                imageView = listViewMessages.findViewById(R.id.bivPic);
-                bm = clickedItem.getPicture();
-                showSaveImageDialog(bm);
+            imageView = listViewMessages.findViewById(R.id.bivPic);
+            bm = clickedItem.getPicture();
+            showSaveImageDialog(bm);
 
 
         }
@@ -572,14 +614,14 @@ public class MainActivity extends BaseActivity   {
         @Override
         public void onClick(View v) {
             dismissPicSelectDialog();
-            showDeleteDialog(clickedItem.getShaCode(),clickedItemPosition);
+            showDeleteDialog(clickedItem.getShaCode(), clickedItemPosition);
         }
     };
 
-    private String storePic(Bitmap photo){
+    private String storePic(Bitmap photo) {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             //String storage = Environment.getExternalStorageDirectory().getPath();
-            File dirFile = new File(PictureUtil.getMyDictRootDirectory(),  "capsule_picture");
+            File dirFile = new File(PictureUtil.getMyDictRootDirectory(), "capsule_picture");
             if (!dirFile.exists()) {
                 if (!dirFile.mkdirs()) {
                     Log.d(TAG, "in setPicToView->文件夹创建失败");
@@ -587,7 +629,7 @@ public class MainActivity extends BaseActivity   {
                     Log.d(TAG, "in setPicToView->文件夹创建成功");
                 }
             }
-            File file_p = new File(dirFile, System.currentTimeMillis()+".jpg");
+            File file_p = new File(dirFile, System.currentTimeMillis() + ".jpg");
 
             // InfoPrefs.setData(SyncStateContract.Constants.UserInfo.HEAD_IMAGE,file.getPath());
             //Log.d("result",file.getPath());
@@ -610,7 +652,6 @@ public class MainActivity extends BaseActivity   {
     private void parseMessage(final String msg) {
 
         String content;
-//        String time;
 
 
         try {
@@ -623,8 +664,8 @@ public class MainActivity extends BaseActivity   {
             headImage = RecevierUID.substring(40, 50);
             Log.e("Tag1", "headImage   " + headImage);
 //           time = jObj.getString("time");
-//           time = jObj.getString("time");
-            userName=RecevierUID.substring(50);
+            currTime = jObj.getString("time");
+            userName = RecevierUID.substring(50);
 
 
             isSelf = true;
@@ -639,7 +680,7 @@ public class MainActivity extends BaseActivity   {
             }
 
             //聊天室在线人数
-            String ONLINE= "-1";
+            String ONLINE = "-1";
             if (RecevierUID.equals(ONLINE)) {
                 Log.e("这里的uid为-1", RecevierUID);
                 online = content;
@@ -661,16 +702,16 @@ public class MainActivity extends BaseActivity   {
                 Log.e("wswsPic", "这里是图片消息");
                 isPicture = true;
                 pictureName = content.substring(2, content.length() - 1);
-                time=String.valueOf(new Date().getTime());
+                time = String.valueOf(new Date().getTime());
                 Log.e("wswsPic", pictureName);
                 new download_picture().start();
             } else { //如果congtent是文字消息
                 isPicture = false;
                 Log.e("wswsText", "这里是文字消息");
-                Content c = new Content(nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, content, isSelf, isPicture,headImage,userName);
+                Content c = new Content(currTime, nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, content, isSelf, isPicture, headImage, userName);
 //                appendMessage(c);
-                store2Db(c,"");
-               // chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), "", false, name));
+                store2Db(c, "");
+                // chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), "", false, name));
             }
 
 
@@ -682,95 +723,95 @@ public class MainActivity extends BaseActivity   {
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
-        Log.e("MainActivity","onDestroy");
+        Log.e("MainActivity", "onDestroy");
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
-        Log.e("MainActivity","onResume");
+        Log.e("MainActivity", "onResume");
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        Log.e("MainActivity","onStop");
+        Log.e("MainActivity", "onStop");
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
-        Log.e("MainActivity","onPause");
+        Log.e("MainActivity", "onPause");
     }
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         super.onRestart();
-        Log.e("MainActivity","onRestart");
+        Log.e("MainActivity", "onRestart");
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        Log.e("MainActivity","onStart");
+        Log.e("MainActivity", "onStart");
     }
 
-    private boolean stringExist(String sc,ArrayList<String> list){
-        for(String i:list){
-            if(i.equals(sc)){
+    private boolean stringExist(String sc, ArrayList<String> list) {
+        for (String i : list) {
+            if (i.equals(sc)) {
                 return true;
             }
         }
         return false;
     }
 
-    private void store2Db(Content c, String picturePath){
+    private void store2Db(Content c, String picturePath) {
         SQLiteDatabase dbw = myDbHelper.getWritableDatabase();
-        ArrayList<String> shaCodeList=new ArrayList<>();
-        ArrayList<String> picPathList=new ArrayList<>();
+        ArrayList<String> shaCodeList = new ArrayList<>();
+        ArrayList<String> picPathList = new ArrayList<>();
         shaCodeList.clear();
         picPathList.clear();
         SQLiteDatabase db = myDbHelper.getReadableDatabase();
-        Cursor cursor=db.query(TABLE_NAME_CHAT,null,"ChatRoomId=?",new String[]{String.valueOf(id)},null,null,null);
-        while(cursor.moveToNext()){
-            String shaCode=cursor.getString(cursor.getColumnIndex(COLUMN_NAME_SHACODE));
-            String picpath=cursor.getString(cursor.getColumnIndex(COLUMN_NAME_PICTURE));
+        Cursor cursor = db.query(TABLE_NAME_CHAT, null, "ChatRoomId=?", new String[]{String.valueOf(id)}, null, null, null);
+        while (cursor.moveToNext()) {
+            String shaCode = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_SHACODE));
+            String picpath = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_PICTURE));
             shaCodeList.add(shaCode);
             picPathList.add(picpath);
         }
         cursor.close();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_NAME_CONTENT,c.getContent());
-        contentValues.put(COLUMN_NAME_ISSELF,c.isSelf());
-        contentValues.put(COLUMN_NAME_ISPICTURE,c.isPicture());
-        contentValues.put(COLUMN_NAME_UID,c.getUid());
-        contentValues.put(COLUMN_NAME_PICTURE,picturePath);
-        contentValues.put(COLUMN_NAME_TIMESTAMP,time);
-        if(headImage==null){
-            headImage="2131230974";
+        contentValues.put(COLUMN_NAME_CONTENT, c.getContent());
+        contentValues.put(COLUMN_NAME_ISSELF, c.isSelf());
+        contentValues.put(COLUMN_NAME_ISPICTURE, c.isPicture());
+        contentValues.put(COLUMN_NAME_UID, c.getUid());
+        contentValues.put(COLUMN_NAME_PICTURE, picturePath);
+        contentValues.put(COLUMN_NAME_TIMESTAMP, time);
+        if (headImage == null) {
+            headImage = "2131230974";
         }
-        contentValues.put(COLUMN_NAME_AVATARID,headImage);
-        if(userName==null){
-            userName=uid.substring(0,5);
+        contentValues.put(COLUMN_NAME_AVATARID, headImage);
+        if (userName == null) {
+            userName = uid.substring(0, 5);
         }
-        contentValues.put(COLUMN_NAME_NICKNAME,userName);
-        Log.e("Tag1","数据库中存储的头象"+headImage);
-        contentValues.put(COLUMN_NAME_CHATROOMID,id);
-        String s=c.getUid()+time;
+        contentValues.put(COLUMN_NAME_NICKNAME, userName);
+        Log.e("Tag1", "数据库中存储的头象" + headImage);
+        contentValues.put(COLUMN_NAME_CHATROOMID, id);
+        String s = c.getUid() + time;
         try {
             String code = shaEncode(s);
             contentValues.put(COLUMN_NAME_SHACODE, code);
-            if(!stringExist(code, shaCodeList)&&time!=""){
-                Log.e("MainActivity","store text chat content into db");
+            if (!stringExist(code, shaCodeList) && time != "") {
+                Log.e("MainActivity", "store text chat content into db");
                 myDbHelper.insertChatData(contentValues, dbw);
-                Log.e("MainActivity","Before appendMessage, set shacode is "+code);
+                Log.e("MainActivity", "Before appendMessage, set shacode is " + code);
                 c.setShaCode(code);
                 appendMessage(c);
-            }else{
-                Log.e("MainActivity","shacode exist!");
+            } else {
+                Log.e("MainActivity", "shacode exist!");
             }
 //            if(picturePath==""){
 //                if(!stringExist(code, shaCodeList)){
@@ -953,7 +994,7 @@ public class MainActivity extends BaseActivity   {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             builder = new AlertDialog.Builder(MainActivity.this)
                     .setTitle("温馨提示：")
-                    .setMessage("您将离开当前时空")
+                    .setMessage("确认离开")
                     .setPositiveButton("确定",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
@@ -1112,7 +1153,7 @@ public class MainActivity extends BaseActivity   {
                         Log.e(TAG, "response code:" + res);
 
                         if (res == 200) {
-                            time=String.valueOf(new Date().getTime());
+                            time = String.valueOf(new Date().getTime());
                             Log.e(TAG, "request success");
                             InputStream input = conn.getInputStream();
                             StringBuffer sb1 = new StringBuffer();
@@ -1125,7 +1166,7 @@ public class MainActivity extends BaseActivity   {
 
                             String pictureCONTENT = "#(" + file.getName() + ")";
                             Log.e(TAG, pictureCONTENT);
-                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(getNewMac(), name, path, id, uid, pictureCONTENT)).subscribe();
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, getNewMac(), name, path, id, uid, pictureCONTENT)).subscribe();
 
                         } else {
                             Log.e(TAG, "request error");
@@ -1389,7 +1430,6 @@ public class MainActivity extends BaseActivity   {
     }
 
 
-
     class onLine extends Thread {
 
         String urla = "http://39.106.39.49:8888/onLine";
@@ -1409,7 +1449,7 @@ public class MainActivity extends BaseActivity   {
                 conn.setReadTimeout(5000);
 
                 Log.e("online的path", path);
-                String content = "path=" + URLEncoder.encode("/chat"+path, "utf-8");
+                String content = "path=" + URLEncoder.encode("/chat" + path, "utf-8");
 
                 // 意思是正文是urlencoded编码过的form参数
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -1443,7 +1483,7 @@ public class MainActivity extends BaseActivity   {
                     is.close();
                     baos.close();
                     // 返回字符串
-                    online= new String(baos.toByteArray());
+                    online = new String(baos.toByteArray());
                     Log.e("返回的online", online);
                     initTitleASK(name + "(" + online + ")");
 
@@ -1508,7 +1548,7 @@ public class MainActivity extends BaseActivity   {
 //        builder.show();
 //    }
 
-    private void showSaveImageDialog (Bitmap bm){
+    private void showSaveImageDialog(Bitmap bm) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("保存图片至相册");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -1525,17 +1565,18 @@ public class MainActivity extends BaseActivity   {
         });
         builder.show();
     }
-    public static void saveBmpToGallery(Context context,Bitmap bm,long picName){
-        Log.i(TAG,"enter save to gallery");
-        String galleryPath= Environment.getExternalStorageDirectory()
-                +File.separator+Environment.DIRECTORY_DCIM
-                +File.separator;
 
-        File file=null;
-        String fileName=null;
-        FileOutputStream outputStream=null;
-        try{
-            File dirFile=new File(galleryPath,"时空小胶囊");//create new file under album
+    public static void saveBmpToGallery(Context context, Bitmap bm, long picName) {
+        Log.i(TAG, "enter save to gallery");
+        String galleryPath = Environment.getExternalStorageDirectory()
+                + File.separator + Environment.DIRECTORY_DCIM
+                + File.separator;
+
+        File file = null;
+        String fileName = null;
+        FileOutputStream outputStream = null;
+        try {
+            File dirFile = new File(galleryPath, "时空小胶囊");//create new file under album
 
             if (!dirFile.exists()) {
                 if (!dirFile.mkdirs()) {
@@ -1544,65 +1585,69 @@ public class MainActivity extends BaseActivity   {
                     Log.d(TAG, "in setPicToView->文件夹创建成功");
                 }
             }
-            file=new File(dirFile,picName+".jpg");
-            fileName=file.toString();
-            outputStream=new FileOutputStream(fileName);
-            if(null!=outputStream){
-                bm.compress(Bitmap.CompressFormat.JPEG,90,outputStream);
+            file = new File(dirFile, picName + ".jpg");
+            fileName = file.toString();
+            outputStream = new FileOutputStream(fileName);
+            if (null != outputStream) {
+                bm.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            try{
-                if(outputStream!=null){
+        } finally {
+            try {
+                if (outputStream != null) {
                     outputStream.close();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        MediaStore.Images.Media.insertImage(context.getContentResolver(),bm,fileName,null);
-        Intent intent=new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri uri=Uri.fromFile(file);
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bm, fileName, null);
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri uri = Uri.fromFile(file);
         intent.setData(uri);
         context.sendBroadcast(intent);
 
-        Toast.makeText(context,"Download success",Toast.LENGTH_LONG).show();
+        Toast.makeText(context, "Download success", Toast.LENGTH_LONG).show();
     }
-    public void checkCameraPermission(){
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED
-                ||ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},300);
+
+    public void checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 300);
             imageCapture();
-        }else{
+        } else {
             imageCapture();
         }
 
     }
+
     public void Camera(View view) {
         checkCameraPermission();
     }
-    private void imageCapture(){
+
+    private void imageCapture() {
         Intent intent;
         Uri pictureUri;
         //saveBmpToGallery(ShowCapturedPhotoActivity.this,photoPath,System.currentTimeMillis());
-        File pictureFile=new File(PictureUtil.getMyDictRootDirectory(),"时空小胶囊");
-        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.N){
-            intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File pictureFile = new File(PictureUtil.getMyDictRootDirectory(), "时空小胶囊");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            pictureUri= FileProvider.getUriForFile(this,"com.example.weahen.wstest",pictureFile);
+            pictureUri = FileProvider.getUriForFile(this, "com.example.weahen.wstest", pictureFile);
 
-        }else{
-            intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            pictureUri=Uri.fromFile(pictureFile);
+        } else {
+            intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            pictureUri = Uri.fromFile(pictureFile);
         }
 
-        intent.putExtra(MediaStore.EXTRA_OUTPUT,pictureUri);
-        Log.e(TAG,"before take photo "+pictureUri.toString());
-        startActivityForResult(intent,REQUEST_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
+        Log.e(TAG, "before take photo " + pictureUri.toString());
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1616,7 +1661,7 @@ public class MainActivity extends BaseActivity   {
                     new os_file().start();
                     break;
                 case REQUEST_IMAGE_CAPTURE:
-                    File pictureFile = new File(PictureUtil.getMyDictRootDirectory(),"时空小胶囊");
+                    File pictureFile = new File(PictureUtil.getMyDictRootDirectory(), "时空小胶囊");
                     Uri pictureUri;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         pictureUri = FileProvider.getUriForFile(this, "com.example.weahen.wstest", pictureFile);

@@ -15,6 +15,7 @@ public class Content {
     private boolean isPicture;
 private String headImage;
 private String userName;
+private String time;
     public Content() {
     }
 
@@ -31,22 +32,24 @@ private String userName;
 //        this.isSelf = isSelf;
 //    }
 
-    public Content( String uid,String content,boolean isSelf,boolean isPicture,String headImage,String userName) {
+    public Content( String time,String uid,String content,boolean isSelf,boolean isPicture,String headImage,String userName) {
         this.uid = uid;
         this.content = content;
         this.isSelf = isSelf;
         this.isPicture = isPicture;
         this.headImage=headImage;
         this.userName=userName;
+        this.time = time;
     }
 
-    public Content( String uid,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName) {
+    public Content( String time,String uid,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName) {
         this.uid = uid;
         this.picture = picture;
         this.isSelf = isSelf;
         this.isPicture = isPicture;
         this.headImage=headImage;
         this.userName=userName;
+        this.time = time;
     }
 
     public void setUserName(String userName) {
@@ -71,6 +74,14 @@ private String userName;
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public Bitmap getPicture() {

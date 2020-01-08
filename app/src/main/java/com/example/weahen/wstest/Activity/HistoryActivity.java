@@ -53,6 +53,7 @@ public class HistoryActivity extends BaseActivity {
     private ArrayList<Content> contentList;
     private ContentListAdapter adapter;
     private ListView lvContracts;
+    String curTime;
     String headImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,13 +103,13 @@ public class HistoryActivity extends BaseActivity {
                 Log.e("History","isSelf is "+isself);
                if (Integer.valueOf(IsPic).intValue() == 0) {//text
                    Log.e("History", "text");
-                   Content content = new Content(uid, Content, isself, false,imageId,nickName);
+                   Content content = new Content(curTime,uid, Content, isself, false,imageId,nickName);
                    content.setShaCode(shaCode);
                    contentList.add(content);
                } else { //image
                    Log.e("History", "pic");
                    Bitmap bp = BitmapFactory.decodeFile(Pic);
-                   Content content = new Content(uid, bp, isself, true,imageId,nickName);
+                   Content content = new Content(curTime,uid, bp, isself, true,imageId,nickName);
                    content.setShaCode(shaCode);
                    contentList.add(content);
                }

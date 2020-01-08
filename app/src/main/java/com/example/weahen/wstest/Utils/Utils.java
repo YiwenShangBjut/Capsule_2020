@@ -70,7 +70,7 @@ public class Utils {
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public String getSendMessageJSON(String macAddress,String name, String path, int id, String uid, String content) {
+    public String getSendMessageJSON(String time,String macAddress,String name, String path, int id, String uid, String content) {
         String json = null;
 
         try {
