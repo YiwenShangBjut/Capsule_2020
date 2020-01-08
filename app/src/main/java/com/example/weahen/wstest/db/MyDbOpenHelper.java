@@ -21,6 +21,8 @@ import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_PICT
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_TIME;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_UID;
 
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_FIELD;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_LOCATION;
@@ -33,7 +35,7 @@ import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ID;
 public class MyDbOpenHelper extends SQLiteOpenHelper {
     private final static String TAG= MyDbOpenHelper.class.getSimpleName();
     public static final String DATABASE_NAME="capsuledb.db";
-    public static final int DATABASE_VERSION=3;
+    public static final int DATABASE_VERSION=4;
     private static MyDbOpenHelper myDbOpenHelper;
     private static final String SQL_DELETE_CHAT="DROP TABLE IF EXISTS "+ TABLE_NAME_CHAT;
     private static final String SQL_DELETE_ROOM="DROP TABLE IF EXISTS "+ TABLE_NAME_ROOM;
@@ -84,7 +86,9 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
                     COLUMN_NAME_PATH+" VARCHAR(100), "+
                     COLUMN_NAME_RESRTVE+" VARCHAR(100), "+
                     COLUMN_NAME_FIELD+" VARCHAR(100), "+
-                   COLUMN_NAME_LOCATION+" VARCHAR(100) "+
+                   COLUMN_NAME_LOCATION+" VARCHAR(100), "+
+                    COLUMN_NAME_STARTTIME+" VARCHAR(100), "+
+                    COLUMN_NAME_ENDTIME+" VARCHAR(100) "+
                     ")" );
             Log.i("Success","Create room table");
         }catch(Exception e){

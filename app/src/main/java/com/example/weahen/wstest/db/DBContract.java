@@ -13,6 +13,8 @@ public class DBContract {
         public static final String COLUMN_NAME_RESRTVE="Reserve";
         public static final String COLUMN_NAME_FIELD="Field";
         public static final String COLUMN_NAME_LOCATION="Location";
+        public static final String COLUMN_NAME_STARTTIME="StartTime";
+        public static final String COLUMN_NAME_ENDTIME="EndTime";
     }
 
     public static class ChatEntry implements BaseColumns{

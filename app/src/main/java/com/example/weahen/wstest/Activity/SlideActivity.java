@@ -1,5 +1,7 @@
 package com.example.weahen.wstest.Activity;
 
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_FIELD;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_LOCATION;
@@ -33,6 +35,7 @@ import android.os.Bundle;
 import com.example.weahen.wstest.Adapter.MyListAdapter;
 import com.example.weahen.wstest.Config.GlobalConfig;
 import com.example.weahen.wstest.Config.URLConfig;
+import com.example.weahen.wstest.Model.ChatRoom;
 import com.example.weahen.wstest.Model.RefreshableView;
 import com.example.weahen.wstest.Model.Tidings;
 import com.example.weahen.wstest.MyApplication;
@@ -111,6 +114,9 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     String getSSID;
     String getBSSID;
 
+    String startTime;
+    String endTime;
+
     private ScreenUtils utils;
     public static String NAME = "";          //连接WiFi名称
     public static String macAddress;     //连接WiFi的MAC
@@ -121,8 +127,9 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     private  List<ChatContent> chatContents;
 
     private MyDbOpenHelper myDbHelper;
-    ArrayList<String> roomNameList;
-    ArrayList<String> roomIdList;
+    ArrayList<ChatRoom> chatRoomList;
+//    ArrayList<String> roomNameList;
+//    ArrayList<String> roomIdList;
     private AlertDialog historyDialog;
 
 
@@ -151,6 +158,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                         RESERVE[i] = TopicListBean.getInt("reserve");
                         FIELD[i] = TopicListBean.getString("field");
                         location[i] = TopicListBean.getString("location");
+                        startTime= TopicListBean.getString("start_TIME");
+                        endTime= TopicListBean.getString("end_TIME");
 
                         Map<String, String> map = new HashMap<>();
                         map.put("name", name[i]); //把解析出来的名字放到map里
@@ -167,6 +176,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                             contentValues.put(COLUMN_NAME_RESRTVE, String.valueOf(RESERVE[i]));
                             contentValues.put(COLUMN_NAME_FIELD, FIELD[i]);
                             contentValues.put(COLUMN_NAME_LOCATION, location[i]);
+                            contentValues.put(COLUMN_NAME_STARTTIME, startTime);
+                            contentValues.put(COLUMN_NAME_ENDTIME, endTime);
 
                             myDbHelper.insertRoomData(contentValues, dbw);
                         }
@@ -183,12 +194,19 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     };
 
     private boolean ifRoomExist(String id){
-        for(String i:roomIdList){
-            if(id.equals(i)){
-                Log.e("IfRoomExist","Room exist");
+        for(int i=0;i<chatRoomList.size();i++){
+            if(id.equals(chatRoomList.get(i).getRoomId())){
+                Log.e("IfRoomExist","Room exist, room id is "+chatRoomList.get(i).getRoomId());
                 return true;
             }
         }
+//        for(String i:chatRoomList.get(i).getRoomId()){
+//            if(id.equals(i)){
+//                Log.e("IfRoomExist","Room exist");
+//                return true;
+//            }
+//        }
+        Log.e("IfRoomExist","Room is not exist, room id is "+id);
         return false;
     }
 
@@ -214,7 +232,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_slide);
 
         myDbHelper = MyDbOpenHelper.getInstance(this);
-
+        getRoomList();
         //创建toolbar工具栏
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -290,7 +308,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         //chatContentDao= MyApplication.getInstances().getDaoSession().getChatContentDao();
        // chatContents = chatContentDao.loadAll();
 
-        getRoomList();
+//        getRoomList();
 
 
         }
@@ -349,34 +367,45 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     }
     public void getRoomList(){
         Log.e("getRoomList","enter get room list");
-        roomNameList=new ArrayList<>();
-        roomIdList=new ArrayList<>();
-        roomIdList.clear();
-        roomNameList.clear();
+        chatRoomList=new ArrayList<>();
+      //  roomNameList=new ArrayList<>();
+     //   roomIdList=new ArrayList<>();
+    //    roomIdList.clear();
+  //      roomNameList.clear();
+        chatRoomList=new ArrayList<>();
+        chatRoomList.clear();
         SQLiteDatabase db = myDbHelper.getReadableDatabase();
         Cursor cursor=db.query(TABLE_NAME_ROOM,null,null,null,null,null,null);
 
         while(cursor.moveToNext()){
-            roomNameList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)));
-            roomIdList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)));
+            chatRoomList.add(new ChatRoom(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_STARTTIME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ENDTIME))));
+          // roomNameList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)));
+           // roomIdList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)));
+
         }
         cursor.close();
     }
 
+
+
     public void showHistoryDialog(){
-        Log.e("SlideActivity","roomList has "+roomNameList.size());
         View view=View.inflate(SlideActivity.this, R.layout.history_listview, null);
         lvContacts = (ListView) view.findViewById(R.id.history_contacts);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.history_listview, roomNameList) {
+        ArrayAdapter<ChatRoom> adapter = new ArrayAdapter<ChatRoom>(this, R.layout.history_listview, chatRoomList) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                String name=getItem(position);
+                ChatRoom selectedRoom=getItem(position);
                 LayoutInflater layoutInflater = getLayoutInflater();
                 View view = layoutInflater.inflate(R.layout.history_list_item, parent, false);
                 TextView roomName=view.findViewById(R.id.room_name);
-                roomName.setText(name);
+                TextView startTime=view.findViewById(R.id.startTime);
+                TextView endTime=view.findViewById(R.id.endTime);
+                roomName.setText(selectedRoom.getRoomName());
+                startTime.setText(selectedRoom.getStartTime());
+                Log.e("SlideActivity","startTime is "+selectedRoom.getStartTime()+"-----------------------------");
+                endTime.setText(selectedRoom.getEndTime());
                 return view;
             }
         };
@@ -384,8 +413,10 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         lvContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String checkedRoomId=roomIdList.get(position);
-                String checkedRoomName=roomNameList.get(position);
+                String checkedRoomId=chatRoomList.get(position).getRoomId();
+                String checkedRoomName=chatRoomList.get(position).getRoomName();
+//                String checkedRoomId=roomIdList.get(position);
+//                String checkedRoomName=roomNameList.get(position);
                 Intent intent=new Intent(SlideActivity.this,HistoryActivity.class);
                 intent.putExtra("id", checkedRoomId);
                 intent.putExtra("roomName", checkedRoomName);
@@ -534,6 +565,9 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                     Log.e("WS","getResponseCode为200");
 
                     InputStream is = conn.getInputStream();
+
+                    Log.e("这里是is",is.toString()+" -------------------------------InputStream");//服务器返回的聊天室的json列表
+
                     byte[] bytes = new byte[1024];
                     int i = 0;
                     StringBuffer sb = new StringBuffer();
@@ -541,7 +575,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                         sb.append(new String(bytes, 0, i));
                     }
 
-                   Log.e("这里是sb",sb.toString());//服务器返回的聊天室的json列表
+                   Log.e("这里是sb",sb.toString()+" -------------------------------string buffer");//服务器返回的聊天室的json列表
 
                     Message message = new Message();
                     message.what = 270;

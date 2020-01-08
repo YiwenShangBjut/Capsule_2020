@@ -1,14 +1,15 @@
 package com.example.weahen.wstest.Activity;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import com.example.weahen.wstest.db.ChatContent;
 import com.example.weahen.wstest.db.ChatContentDao;
 import com.example.weahen.wstest.db.DaoMaster;
 import com.example.weahen.wstest.db.DaoSession;
+import com.example.weahen.wstest.db.MyDbOpenHelper;
 import com.example.weahen.wstest.widget.SetPermissionDialog;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.youth.banner.Banner;
@@ -44,6 +46,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
+
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ID;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_NAME;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
 
 public class FunctionActivity extends BaseActivity implements OnBannerListener {
 
@@ -71,16 +77,20 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
     String name;
 
     private static ListView lvContacts;
-    private static List<String> roomNameList;
-    private ChatContentDao chatContentDao;
-    private  List<ChatContent> chatContents;
-    private ChatContent clickedRoom;
+
+    ArrayList<String> roomNameList;
+    ArrayList<String> roomIdList;
+    private AlertDialog historyDialog;
+
+    private MyDbOpenHelper myDbHelper;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_function);
+        myDbHelper = MyDbOpenHelper.getInstance(this);
+        getRoomList();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getBundleExtra("bun");
@@ -100,6 +110,12 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
         button2_1 = findViewById(R.id.button2_1);
         textView1_1 = findViewById(R.id.text1_1);
         textView2_1 = findViewById(R.id.text2_1);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("");
+        toolbar.setTitleTextColor(1);
 
 
       //field= 0  意思是这是合生汇那种大群，进去以后还有小群
@@ -166,12 +182,99 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
 
     }
 
-    public void outputChatList(){
-        for(ChatContent c:chatContents){
-            Log.e("ChatContent",c.getChatRoom()+" "+c.getContent()+" "+c.getTime()+" "+c.getUid());
-        }
+    @Override
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        return true;
+
     }
 
+
+    @Override
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+
+            Intent intent = new Intent(FunctionActivity.this, PersonalizedActivity.class);
+
+            startActivity(intent);
+
+        }else if(id==R.id.action_settings_history){
+            showHistoryDialog();
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    public void getRoomList(){
+        Log.e("getRoomList","enter get room list");
+        roomNameList=new ArrayList<>();
+        roomIdList=new ArrayList<>();
+        roomIdList.clear();
+        roomNameList.clear();
+        SQLiteDatabase db = myDbHelper.getReadableDatabase();
+        Cursor cursor=db.query(TABLE_NAME_ROOM,null,null,null,null,null,null);
+
+        while(cursor.moveToNext()){
+            roomNameList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)));
+            roomIdList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)));
+        }
+        cursor.close();
+    }
+
+
+    public void showHistoryDialog(){
+        Log.e("SlideActivity","roomList has "+roomNameList.size());
+        View view=View.inflate(FunctionActivity.this, R.layout.history_listview, null);
+        lvContacts = (ListView) view.findViewById(R.id.history_contacts);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.history_listview, roomNameList) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                String name=getItem(position);
+                LayoutInflater layoutInflater = getLayoutInflater();
+                View view = layoutInflater.inflate(R.layout.history_list_item, parent, false);
+                TextView roomName=view.findViewById(R.id.room_name);
+                roomName.setText(name);
+                return view;
+            }
+        };
+        lvContacts.setAdapter(adapter);
+        lvContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String checkedRoomId=roomIdList.get(position);
+                String checkedRoomName=roomNameList.get(position);
+                Intent intent=new Intent(FunctionActivity.this,HistoryActivity.class);
+                intent.putExtra("id", checkedRoomId);
+                intent.putExtra("roomName", checkedRoomName);
+                historyDialog.dismiss();
+                startActivity(intent);
+                // clickedRoom=chatContents.get(position);
+            }
+        });
+
+        if(historyDialog==null){
+            android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(FunctionActivity.this);
+            builder.setView(view);
+            historyDialog=builder.create();
+            historyDialog.show();
+        }else{
+            historyDialog.show();
+        }
+
+    }
 
 
 
