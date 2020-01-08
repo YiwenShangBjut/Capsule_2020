@@ -373,20 +373,12 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     public void getRoomList(){
         Log.e("getRoomList","enter get room list");
         chatRoomList=new ArrayList<>();
-      //  roomNameList=new ArrayList<>();
-     //   roomIdList=new ArrayList<>();
-    //    roomIdList.clear();
-  //      roomNameList.clear();
-        chatRoomList=new ArrayList<>();
         chatRoomList.clear();
         SQLiteDatabase db = myDbHelper.getReadableDatabase();
         Cursor cursor=db.query(TABLE_NAME_ROOM,null,null,null,null,null,null);
 
         while(cursor.moveToNext()){
             chatRoomList.add(new ChatRoom(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_STARTTIME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ENDTIME))));
-          // roomNameList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)));
-           // roomIdList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)));
-
         }
         cursor.close();
     }
@@ -399,8 +391,9 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
             public void onClick(DialogInterface dialogInterface, int i) {
                 myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
                 chatRoomList.remove(position);
-                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
                 adapter.notifyDataSetChanged();
+                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -441,8 +434,6 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String checkedRoomId=chatRoomList.get(position).getRoomId();
                 String checkedRoomName=chatRoomList.get(position).getRoomName();
-//                String checkedRoomId=roomIdList.get(position);
-//                String checkedRoomName=roomNameList.get(position);
                 Intent intent=new Intent(SlideActivity.this,HistoryActivity.class);
                 intent.putExtra("id", checkedRoomId);
                 intent.putExtra("roomName", checkedRoomName);
