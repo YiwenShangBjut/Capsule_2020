@@ -3,6 +3,7 @@ package com.example.weahen.wstest.Activity;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.weahen.wstest.BaseActivity;
+import com.example.weahen.wstest.Model.ChatRoom;
 import com.example.weahen.wstest.MyApplication;
 import com.example.weahen.wstest.R;
 import com.example.weahen.wstest.db.ChatContent;
@@ -47,8 +49,10 @@ import java.util.List;
 
 import io.reactivex.functions.Consumer;
 
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ID;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_NAME;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
 
 public class FunctionActivity extends BaseActivity implements OnBannerListener {
@@ -78,11 +82,13 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
 
     private static ListView lvContacts;
 
-    ArrayList<String> roomNameList;
-    ArrayList<String> roomIdList;
+    //ArrayList<String> roomNameList;
+    //ArrayList<String> roomIdList;
+    ArrayList<ChatRoom> chatRoomList;
     private AlertDialog historyDialog;
 
     private MyDbOpenHelper myDbHelper;
+    ArrayAdapter<ChatRoom> adapter;
 
 
     @Override
@@ -118,7 +124,7 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
         toolbar.setTitleTextColor(1);
 
 
-      //field= 0  意思是这是合生汇那种大群，进去以后还有小群
+        //field= 0  意思是这是合生汇那种大群，进去以后还有小群
         if(field.equals(0) ) {
             button1_1.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -177,9 +183,32 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
 //        chatContentDao = daoSession.getChatContentDao();
 
         //chatContentDao= MyApplication.getInstances().getDaoSession().getChatContentDao();
-       // chatContents = chatContentDao.loadAll();
+        // chatContents = chatContentDao.loadAll();
         //outputChatList();
 
+    }
+
+    private void showDeleteDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(FunctionActivity.this);
+        builder.setTitle("删除此聊天室");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                myDbHelper.deleteRoom(chatRoomList.get(position).getRoomId());
+                chatRoomList.remove(position);
+                adapter.notifyDataSetChanged();
+                Toast.makeText(FunctionActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -218,35 +247,36 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
 
     public void getRoomList(){
         Log.e("getRoomList","enter get room list");
-        roomNameList=new ArrayList<>();
-        roomIdList=new ArrayList<>();
-        roomIdList.clear();
-        roomNameList.clear();
+        chatRoomList=new ArrayList<>();
+        chatRoomList.clear();
         SQLiteDatabase db = myDbHelper.getReadableDatabase();
         Cursor cursor=db.query(TABLE_NAME_ROOM,null,null,null,null,null,null);
 
         while(cursor.moveToNext()){
-            roomNameList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)));
-            roomIdList.add(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)));
+            chatRoomList.add(new ChatRoom(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_STARTTIME)),cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ENDTIME))));
         }
         cursor.close();
     }
 
 
     public void showHistoryDialog(){
-        Log.e("SlideActivity","roomList has "+roomNameList.size());
         View view=View.inflate(FunctionActivity.this, R.layout.history_listview, null);
         lvContacts = (ListView) view.findViewById(R.id.history_contacts);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.history_listview, roomNameList) {
+        adapter = new ArrayAdapter<ChatRoom>(this, R.layout.history_listview, chatRoomList) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                String name=getItem(position);
+                ChatRoom selectedRoom=getItem(position);
                 LayoutInflater layoutInflater = getLayoutInflater();
                 View view = layoutInflater.inflate(R.layout.history_list_item, parent, false);
                 TextView roomName=view.findViewById(R.id.room_name);
-                roomName.setText(name);
+                TextView startTime=view.findViewById(R.id.startTime);
+                TextView endTime=view.findViewById(R.id.endTime);
+                roomName.setText(selectedRoom.getRoomName());
+                startTime.setText(selectedRoom.getStartTime());
+                Log.e("SlideActivity","startTime is "+selectedRoom.getStartTime()+"-----------------------------");
+                endTime.setText(selectedRoom.getEndTime());
                 return view;
             }
         };
@@ -254,8 +284,8 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
         lvContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String checkedRoomId=roomIdList.get(position);
-                String checkedRoomName=roomNameList.get(position);
+                String checkedRoomId=chatRoomList.get(position).getRoomId();
+                String checkedRoomName=chatRoomList.get(position).getRoomName();
                 Intent intent=new Intent(FunctionActivity.this,HistoryActivity.class);
                 intent.putExtra("id", checkedRoomId);
                 intent.putExtra("roomName", checkedRoomName);
@@ -265,8 +295,16 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
             }
         });
 
+        lvContacts.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                showDeleteDialog(position);
+                return true;
+            }
+        });
+
         if(historyDialog==null){
-            android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(FunctionActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(FunctionActivity.this);
             builder.setView(view);
             historyDialog=builder.create();
             historyDialog.show();
@@ -369,6 +407,22 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
                         }
                     }
                 });
+    }
+    private boolean ifRoomExist(String id){
+        for(int i=0;i<chatRoomList.size();i++){
+            if(id.equals(chatRoomList.get(i).getRoomId())){
+                Log.e("IfRoomExist","Room exist, room id is "+chatRoomList.get(i).getRoomId());
+                return true;
+            }
+        }
+//        for(String i:chatRoomList.get(i).getRoomId()){
+//            if(id.equals(i)){
+//                Log.e("IfRoomExist","Room exist");
+//                return true;
+//            }
+//        }
+        Log.e("IfRoomExist","Room is not exist, room id is "+id);
+        return false;
     }
 
 }
