@@ -14,6 +14,7 @@ import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_UID;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -59,6 +60,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.weahen.wstest.Adapter.ContentListAdapter;
+import com.example.weahen.wstest.Adapter.ContentListAdapterInMain;
 import com.example.weahen.wstest.BaseActivity;
 import com.example.weahen.wstest.Model.Content;
 import com.example.weahen.wstest.Model.RefreshableView;
@@ -351,9 +353,9 @@ public class MainActivity extends BaseActivity {
 //             }
 //         });
 
-
+Activity activity=MainActivity.this;
         listContent = new ArrayList<Content>();
-        adapter2 = new ContentListAdapter(this, listContent);
+        adapter2 = new ContentListAdapter (this, listContent);
         listViewMessages.setAdapter(adapter2);
 
 
