@@ -350,7 +350,7 @@ public class MainActivity extends BaseActivity {
 
 
         listContent = new ArrayList<Content>();
-        adapter2 = new ContentListAdapter(this, listContent);
+        adapter2 = new ContentListAdapter(this, listContent,this);
         listViewMessages.setAdapter(adapter2);
 
 

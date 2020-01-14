@@ -80,6 +80,19 @@
             android:src="@drawable/msg_state_fail_resend"
             android:visibility="invisible" />
 
+        <TextView
+            android:id="@+id/chat_item_withdraw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/chat_item_layout_content"
+            android:focusable="false"
+            android:textColor="@color/blue"
+            android:text="撤回"
+            android:textSize="10dp"
+            android:visibility="visible" />
+
         <ProgressBar
             android:id="@+id/chat_item_progress"
             style="@android:style/Widget.ProgressBar.Small.Inverse"
@@ -93,7 +106,7 @@
 
 </LinearLayout>
 
-<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
     <!--android:layout_width="match_parent"-->
     <!--android:layout_height="match_parent"-->
     <!--android:gravity="right"-->
@@ -115,25 +128,25 @@
     <!--android:textStyle="italic" />-->
 
     <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-        <!--&lt;!&ndash;android:id="@+id/time"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:gravity="center"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:text="这里是时间"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:textColor="@color/lblFromName"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:textSize="12dp" />&ndash;&gt;-->
+    <!--&lt;!&ndash;android:id="@+id/time"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:gravity="center"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:text="这里是时间"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:textColor="@color/lblFromName"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:textSize="12dp" />&ndash;&gt;-->
 
     <!--<TextView-->
-        <!--android:id="@+id/txtMsg"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginLeft="80dp"-->
-        <!--android:background="@drawable/bg_msg_you"-->
-        <!--android:paddingBottom="5dp"-->
-        <!--android:paddingLeft="10dp"-->
-        <!--android:paddingRight="10dp"-->
-        <!--android:paddingTop="5dp"-->
-        <!--android:textColor="@color/white"-->
-        <!--android:textSize="16dp" />-->
+    <!--android:id="@+id/txtMsg"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginLeft="80dp"-->
+    <!--android:background="@drawable/bg_msg_you"-->
+    <!--android:paddingBottom="5dp"-->
+    <!--android:paddingLeft="10dp"-->
+    <!--android:paddingRight="10dp"-->
+    <!--android:paddingTop="5dp"-->
+    <!--android:textColor="@color/white"-->
+    <!--android:textSize="16dp" />-->
 
-<!--</LinearLayout>-->
+    <!--</LinearLayout>-->

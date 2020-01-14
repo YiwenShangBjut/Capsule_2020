@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.weahen.wstest.R;
+
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.CID;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_AVATARID;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_CHATROOMID;
@@ -137,8 +139,8 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void insertTestingRoomData(){
-        SQLiteDatabase database=getWritableDatabase();
+    public void insertTestingRoomData(SQLiteDatabase database){
+       // SQLiteDatabase database=getWritableDatabase();
         ContentValues contentValues1 = new ContentValues();
         contentValues1.put(COLUMN_NAME_NAME, "name1");
         contentValues1.put(COLUMN_NAME_PATH, "path1");
@@ -198,6 +200,32 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void insertTestingChatData(SQLiteDatabase database) {
+        //SQLiteDatabase database=getWritableDatabase();
+        ContentValues contentValues1 = new ContentValues();
+        contentValues1.put(COLUMN_NAME_CONTENT, "测试信息");
+        contentValues1.put(COLUMN_NAME_ISSELF,1);
+        contentValues1.put(COLUMN_NAME_ISPICTURE, 0);
+        contentValues1.put(COLUMN_NAME_UID, "");
+        contentValues1.put(COLUMN_NAME_PICTURE,"");
+        contentValues1.put(COLUMN_NAME_TIMESTAMP, "");
+        contentValues1.put(COLUMN_NAME_NICKNAME, "userName");
+        contentValues1.put(COLUMN_NAME_CHATROOMID, "ID1");
+        contentValues1.put(COLUMN_NAME_AVATARID, R.drawable.s01);
+        try {
+            Log.e("MyDbHelper","insert chat data");
+            database.insert(TABLE_NAME_CHAT, "_id", contentValues1);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "Error on insert chat data: " + e.toString());
+        } finally {
+            if (null != database) {
+               // database.close();
+            }
+        }
+    }
+
     public String getPicPath(String shaCode) {
         SQLiteDatabase database=getReadableDatabase();
         String path="";
@@ -240,6 +268,8 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
         Log.e("MydbHelper","iniDb");
         createRoomTable(database);
         createChatTable(database);
+      //  insertTestingRoomData(database);
+      //  insertTestingChatData(database);
     }
 
 
