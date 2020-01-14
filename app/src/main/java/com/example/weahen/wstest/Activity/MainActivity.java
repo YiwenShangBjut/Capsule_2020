@@ -55,6 +55,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.weahen.wstest.Adapter.ContentListAdapter;
@@ -102,6 +103,7 @@ import ua.naiksoftware.stomp.StompClient;
 MainActivity是从functionActivity来的
  */
 public class MainActivity extends BaseActivity {
+    private static final String TAG1 = "MainActivity";
     private boolean enter;
     RefreshableView refreshableView;
     private com.example.weahen.wstest.widget.CircleImageView avatar;
@@ -215,8 +217,7 @@ public class MainActivity extends BaseActivity {
     };
     //  private ChatContentDao chatContentDao;
     private String nick;
-
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -301,6 +302,7 @@ public class MainActivity extends BaseActivity {
         Log.e("Tag1", "main中拼接前键值对中的值  " + t);
         uid = uid + idpre.getString("id", uid.substring(0, 5));
         Log.e("Tag1", "main中拼接后uid的值  " + uid);
+
         //设置发送按钮的点击状态和事件
         btnSend.setEnabled(false);
         TextWatcher textWatcher = new TextWatcher() {
@@ -311,6 +313,7 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
                 btnSend.setEnabled(false);
                 if (inputMsg.getText().toString().trim().length() > 0) {
                     btnSend.setEnabled(true);
@@ -725,6 +728,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         Log.e("MainActivity", "onDestroy");
     }
 
@@ -841,9 +845,8 @@ public class MainActivity extends BaseActivity {
      * 把消息放到listView里
      */
     private void appendMessage(final Content c) {
-
+Log.e("TAG",TAG1+"  再次进入调用appendMessage");
         runOnUiThread(new Runnable() {
-
             @Override
             public void run() {
                 listContent.add(c);
