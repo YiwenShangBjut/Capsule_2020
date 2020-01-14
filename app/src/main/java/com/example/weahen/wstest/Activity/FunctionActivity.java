@@ -194,14 +194,16 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
-                myDbHelper.deleteRoom(chatRoomList.get(position).getRoomId());
-                chatRoomList.remove(position);
-                adapter.notifyDataSetChanged();
-                Toast.makeText(FunctionActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+//                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+//                myDbHelper.deleteRoom(chatRoomList.get(position).getRoomId());
+//                chatRoomList.remove(position);
+//                adapter.notifyDataSetChanged();
+//                Toast.makeText(FunctionActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+                deleteHistory(position);
 
             }
         });
+
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -210,7 +212,22 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
         });
         builder.show();
     }
-
+    private void deleteHistory(final int position) {
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                        chatRoomList.remove(position);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(FunctionActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }).start();
+    }
     @Override
 
     public boolean onCreateOptionsMenu(Menu menu) {

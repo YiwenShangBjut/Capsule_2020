@@ -186,6 +186,7 @@ public class HistoryActivity extends BaseActivity {
         builder.show();
     }
 
+
     private void showDeleteRoomDialog (){
         AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
         builder.setTitle("删除此聊天室记录");

@@ -137,6 +137,20 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     private AlertDialog historyDialog;
 
 
+//    Handler hisHandler=new Handler(){
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            if(msg.what==0){
+//                int position=(int)msg.obj;
+//                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+//                chatRoomList.remove(position);
+//                adapter.notifyDataSetChanged();
+//                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+//            }
+//        }
+//    };
+
       //解析服务器返回的json
     Handler handler = new Handler() {
         @Override
@@ -237,6 +251,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_slide);
 
         myDbHelper = MyDbOpenHelper.getInstance(this);
+      //  myDbHelper.insertTestingRoomData();
+
         getRoomList();
         //创建toolbar工具栏
 
@@ -389,10 +405,16 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
-                chatRoomList.remove(position);
-                adapter.notifyDataSetChanged();
-                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+              //  myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                deleteHistory(position);
+//                chatRoomList.remove(position);
+//                adapter.notifyDataSetChanged();
+//                Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+
+//                Message message = new Message();
+//                message.what = 0;
+//                message.obj =position;
+//                hisHandler.sendMessage(message);
 
             }
         });
@@ -404,7 +426,22 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         });
         builder.show();
     }
-
+    private void deleteHistory(final int position) {
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                        chatRoomList.remove(position);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(SlideActivity.this, "已删除聊天室", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }).start();
+    }
 
 
     public void showHistoryDialog(){

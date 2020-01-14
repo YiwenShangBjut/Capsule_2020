@@ -137,6 +137,52 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void insertTestingRoomData(){
+        SQLiteDatabase database=getWritableDatabase();
+        ContentValues contentValues1 = new ContentValues();
+        contentValues1.put(COLUMN_NAME_NAME, "name1");
+        contentValues1.put(COLUMN_NAME_PATH, "path1");
+        contentValues1.put(COLUMN_NAME_ID, "ID1");
+        contentValues1.put(COLUMN_NAME_RESRTVE,"reserve1");
+        contentValues1.put(COLUMN_NAME_FIELD,"field1");
+        contentValues1.put(COLUMN_NAME_LOCATION,"location1");
+        contentValues1.put(COLUMN_NAME_STARTTIME,"starttime1");
+        contentValues1.put(COLUMN_NAME_ENDTIME, "endtime1");
+
+        ContentValues contentValues2 = new ContentValues();
+        contentValues2.put(COLUMN_NAME_NAME, "name2");
+        contentValues2.put(COLUMN_NAME_PATH, "path1");
+        contentValues2.put(COLUMN_NAME_ID, "ID2");
+        contentValues2.put(COLUMN_NAME_RESRTVE,"reserve1");
+        contentValues2.put(COLUMN_NAME_FIELD,"field1");
+        contentValues2.put(COLUMN_NAME_LOCATION,"location1");
+        contentValues2.put(COLUMN_NAME_STARTTIME,"starttime1");
+        contentValues2.put(COLUMN_NAME_ENDTIME, "endtime1");
+
+        ContentValues contentValues3 = new ContentValues();
+        contentValues3.put(COLUMN_NAME_NAME, "name3");
+        contentValues3.put(COLUMN_NAME_PATH, "path1");
+        contentValues3.put(COLUMN_NAME_ID, "ID3");
+        contentValues3.put(COLUMN_NAME_RESRTVE,"reserve1");
+        contentValues3.put(COLUMN_NAME_FIELD,"field1");
+        contentValues3.put(COLUMN_NAME_LOCATION,"location1");
+        contentValues3.put(COLUMN_NAME_STARTTIME,"starttime1");
+        contentValues3.put(COLUMN_NAME_ENDTIME, "endtime1");
+        try{
+            database.insert(TABLE_NAME_ROOM,"_id",contentValues1);
+            database.insert(TABLE_NAME_ROOM,"_id",contentValues2);
+            database.insert(TABLE_NAME_ROOM,"_id",contentValues3);
+
+        }catch(Exception e){
+            e.printStackTrace();
+            Log.e(TAG,"Error on insert room data: "+e.toString());
+        }finally{
+            if(null!=database){
+
+            }
+        }
+    }
+
     public void insertChatData(ContentValues contentValues, SQLiteDatabase database) {
         try {
             Log.e("MyDbHelper","insert chat data");
