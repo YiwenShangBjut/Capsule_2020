@@ -268,7 +268,7 @@ public class MyDbOpenHelper extends SQLiteOpenHelper {
         Log.e("MydbHelper","iniDb");
         createRoomTable(database);
         createChatTable(database);
-      //  insertTestingRoomData(database);
+       // insertTestingRoomData(database);
       //  insertTestingChatData(database);
     }
 

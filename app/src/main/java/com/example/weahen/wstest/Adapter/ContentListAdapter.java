@@ -51,6 +51,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
     private Context context;
     private Activity activity;
     private List<Content> contentItems;
+    public Thread thread;
 
     Content m;
     ImageView imageView;
@@ -112,8 +113,12 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
 
             } else {
-                convertView = mInflater.inflate(R.layout.list_item_message_right, null);
 
+                if(contentItems.get(position).getWithdraw()){
+                    convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
+                } else{
+                    convertView = mInflater.inflate(R.layout.list_item_message_right, null);
+                }
                 TextView txtMsg = convertView.findViewById(R.id.txtMsg);
                 txtMsg.setText(m.getContent());
 
@@ -152,22 +157,24 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
         txtTime.setText(m.getTime());
         TextView withdraw=convertView.findViewById(R.id.chat_item_withdraw);
 
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-              activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            Thread.sleep(3000);
-                        }catch (Exception e){
 
-                        }
-                        withdraw.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
-        }).start();
+
+//       thread = new Thread(new Runnable(){
+//            @Override
+//            public void run(){
+//              activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            Thread.sleep(3000);
+//                        }catch (Exception e){
+//
+//                        }
+//                        withdraw.setVisibility(View.GONE);
+//                    }
+//                });
+//            }
+//        });
 
         return convertView;
     }
