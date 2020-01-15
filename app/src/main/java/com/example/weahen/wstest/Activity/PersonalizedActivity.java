@@ -97,13 +97,7 @@ public class PersonalizedActivity extends BaseActivity {
             }
         });
 
-        Button back=findViewById(R.id.back);
-        back.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+      
     }
 
     private void initImage() {
