@@ -118,7 +118,7 @@ public class HistoryActivity extends BaseActivity {
 
         cursor.close();
      //   Log.e("History","content list column num is "+contentList.size());
-        adapter=new ContentListAdapter(this, contentList);
+        adapter=new ContentListAdapter(this, contentList,this);
         lvContracts=(ListView)findViewById(R.id.history_activity_contacts);
         lvContracts.setAdapter(adapter);
         lvContracts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -128,9 +128,28 @@ public class HistoryActivity extends BaseActivity {
                 String shaCode=clickedContent.getShaCode();
               //  Log.e("History","onItem click, shacode is "+shaCode);
                 showDeleteDialog(shaCode,position);
-
             }
         });
+//        Log.e("HISTORY",String.valueOf(lvContracts.getChildCount()));
+//        lvContracts.getAdapter().getView(0,convertView,parent)
+//        TextView withdraw = lvContracts.getChildAt(1).findViewById(R.id.chat_item_withdraw);
+//        new Thread(new Runnable(){
+//            @Override
+//            public void run(){
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            Thread.sleep(3000);
+//                        }catch (Exception e){
+//
+//                        }
+//                        withdraw.setVisibility(View.INVISIBLE);
+//                    }
+//                });
+//            }
+//        }).start();
+
 
     }
 

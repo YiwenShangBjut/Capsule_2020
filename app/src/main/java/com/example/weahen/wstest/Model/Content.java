@@ -16,6 +16,7 @@ public class Content {
 private String headImage;
 private String userName;
 private String time;
+private boolean withdraw;
     public Content() {
     }
 
@@ -40,6 +41,7 @@ private String time;
         this.headImage=headImage;
         this.userName=userName;
         this.time = time;
+        this.withdraw=true;
     }
 
     public Content( String time,String uid,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName) {
@@ -121,6 +123,13 @@ private String time;
     }
     public void setPicture(boolean picture) {
         isPicture = picture;
+    }
+
+    public boolean getWithdraw() {
+        return withdraw;
+    }
+    public void setWithdraw(boolean w) {
+        withdraw = w;
     }
 
 }

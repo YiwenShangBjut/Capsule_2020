@@ -24,10 +24,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.weahen.wstest.Activity.HistoryActivity;
 import com.example.weahen.wstest.Activity.MainActivity;
 import com.example.weahen.wstest.Activity.ShowImageActivity;
+import com.example.weahen.wstest.Activity.SlideActivity;
 import com.example.weahen.wstest.Model.Content;
 import com.example.weahen.wstest.Obj.ImageInfoObj;
 import com.example.weahen.wstest.Obj.ImageWidgetInfoObj;
@@ -46,7 +49,9 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
 
     private Context context;
+    private Activity activity;
     private List<Content> contentItems;
+    public Thread thread;
 
     Content m;
     ImageView imageView;
@@ -56,9 +61,10 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
     private ImageWidgetInfoObj imageWidgetInfoObj;
 
 
-    public ContentListAdapter(Context context, List<Content> navDrawerItems) {
+    public ContentListAdapter(Context context, List<Content> navDrawerItems, Activity activity) {
         this.context = context;
         this.contentItems = navDrawerItems;
+        this.activity=activity;
     }
 
     @Override
@@ -107,10 +113,16 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
 
             } else {
-                convertView = mInflater.inflate(R.layout.list_item_message_right, null);
 
+                if(contentItems.get(position).getWithdraw()){
+                    convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
+                } else{
+                    convertView = mInflater.inflate(R.layout.list_item_message_right, null);
+                }
                 TextView txtMsg = convertView.findViewById(R.id.txtMsg);
                 txtMsg.setText(m.getContent());
+
+
             }
         } else {
             if (contentItems.get(position).isPicture()) {
@@ -139,11 +151,30 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
         int i = Integer.parseInt(m.getHeadImage());
         Log.e("Tag1", "i" + i);
-        imageSend.setImageResource(i);
+       // imageSend.setImageResource(i);
 //显示时间
         TextView txtTime = convertView.findViewById(R.id.getCurrentTime);
         txtTime.setText(m.getTime());
+        TextView withdraw=convertView.findViewById(R.id.chat_item_withdraw);
 
+
+
+//       thread = new Thread(new Runnable(){
+//            @Override
+//            public void run(){
+//              activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            Thread.sleep(3000);
+//                        }catch (Exception e){
+//
+//                        }
+//                        withdraw.setVisibility(View.GONE);
+//                    }
+//                });
+//            }
+//        });
 
         return convertView;
     }

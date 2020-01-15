@@ -68,16 +68,15 @@
 
         </LinearLayout>
 
-<TextView
-    android:id="@+id/chat_item_withdraw"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:layout_centerVertical="true"
-    android:layout_marginRight="10dp"
-    android:layout_toLeftOf="@+id/chat_item_layout_content"
-    android:text="撤销"
-    android:visibility="invisible"
-    />
+        <TextView
+            android:id="@+id/cancerSend"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/chat_item_layout_content"
+            android:text="撤销"
+            android:visibility="invisible"/>
         <ImageView
             android:id="@+id/chat_item_fail"
             android:layout_width="18dp"
@@ -88,6 +87,19 @@
             android:focusable="false"
             android:src="@drawable/msg_state_fail_resend"
             android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/chat_item_withdraw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/chat_item_layout_content"
+            android:focusable="false"
+            android:textColor="@color/blue"
+            android:text="撤回"
+            android:textSize="10dp"
+            android:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/chat_item_progress"

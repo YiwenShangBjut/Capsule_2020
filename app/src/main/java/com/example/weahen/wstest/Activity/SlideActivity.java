@@ -251,7 +251,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_slide);
 
         myDbHelper = MyDbOpenHelper.getInstance(this);
-      //  myDbHelper.insertTestingRoomData();
+
 
         getRoomList();
         //创建toolbar工具栏

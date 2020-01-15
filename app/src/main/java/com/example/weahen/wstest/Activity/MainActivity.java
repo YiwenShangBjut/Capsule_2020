@@ -355,7 +355,7 @@ public class MainActivity extends BaseActivity {
 
 Activity activity=MainActivity.this;
         listContent = new ArrayList<Content>();
-        adapter2 = new ContentListAdapter (this, listContent);
+        adapter2 = new ContentListAdapter(this, listContent,this);
         listViewMessages.setAdapter(adapter2);
 
 
@@ -816,6 +816,7 @@ Activity activity=MainActivity.this;
                 Log.e("MainActivity", "Before appendMessage, set shacode is " + code);
                 c.setShaCode(code);
                 appendMessage(c);
+                changeWithdraw(listContent.size());
             } else {
                 Log.e("MainActivity", "shacode exist!");
             }
@@ -847,15 +848,71 @@ Activity activity=MainActivity.this;
      * 把消息放到listView里
      */
     private void appendMessage(final Content c) {
-Log.e("TAG",TAG1+"  再次进入调用appendMessage");
-        runOnUiThread(new Runnable() {
+        Log.e("TAG",TAG1+"  再次进入调用appendMessage");
+        Log.e("Main","appendMessage----------");
+        new Thread(new Runnable(){
+
             @Override
             public void run() {
-                listContent.add(c);
-                adapter2.notifyDataSetChanged();
-                playBeep();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listContent.add(c);
+                        adapter2.notifyDataSetChanged();
+                     //   Toast.makeText(MainActivity.this, "withdraw is "+c.getWithdraw(), Toast.LENGTH_LONG).show();
+                        playBeep();
+                        //   changeWithdraw(c);
+                        // adapter2.thread.start();
+//                try{
+//                    Thread.sleep(3000);
+//                }catch (Exception e){
+//
+//                }
+//                listContent.get(listContent.size()-1).setWithdraw(false);
+//                adapter2.notifyDataSetChanged();
+//                Toast.makeText(MainActivity.this, "change withdraw boolean value", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
-        });
+        }).start();
+
+    }
+
+    private void changeWithdraw(int i){
+        Log.e("Main","change withdraw----------");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listContent.get(i).setWithdraw(false);
+                        adapter2.notifyDataSetChanged();
+                     //   Toast.makeText(MainActivity.this, "withdraw is " + c.getWithdraw(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+        }).start();
+
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try{
+//                    Thread.sleep(3000);
+//                }catch (Exception e){
+//
+//                }
+//                listContent.get(listContent.size()-1).setWithdraw(false);
+//                adapter2.notifyDataSetChanged();
+//                Toast.makeText(MainActivity.this, "withdraw is "+c.getWithdraw(), Toast.LENGTH_LONG).show();
+//            }
+//        });
     }
 
 
