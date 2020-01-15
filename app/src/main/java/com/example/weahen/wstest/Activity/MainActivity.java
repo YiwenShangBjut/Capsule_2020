@@ -814,7 +814,7 @@ public class MainActivity extends BaseActivity {
                 Log.e("MainActivity", "Before appendMessage, set shacode is " + code);
                 c.setShaCode(code);
                 appendMessage(c);
-                changeWithdraw(c);
+                changeWithdraw(listContent.size());
             } else {
                 Log.e("MainActivity", "shacode exist!");
             }
@@ -876,7 +876,7 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    private void changeWithdraw(Content c){
+    private void changeWithdraw(int i){
         Log.e("Main","change withdraw----------");
         new Thread(new Runnable() {
             @Override
@@ -889,7 +889,7 @@ public class MainActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        listContent.get(listContent.size() - 1).setWithdraw(false);
+                        listContent.get(i).setWithdraw(false);
                         adapter2.notifyDataSetChanged();
                      //   Toast.makeText(MainActivity.this, "withdraw is " + c.getWithdraw(), Toast.LENGTH_LONG).show();
                     }
