@@ -387,7 +387,13 @@ Activity activity=MainActivity.this;
                     }
                 } else {
                     if (textSelectDialog == null) {
-                        @SuppressLint("InflateParams") View rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_dialog, null);
+                        @SuppressLint("InflateParams") View rootView;
+                        if(clickedItem.getWithdraw()){
+                            rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_withdraw_dialog, null);
+                        }else{
+                            rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_dialog, null);
+                        }
+
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         rootView.findViewById(R.id.delete_text).setOnClickListener(onDeleteTextListener);
                         builder.setView(rootView);
@@ -859,18 +865,7 @@ Activity activity=MainActivity.this;
                     public void run() {
                         listContent.add(c);
                         adapter2.notifyDataSetChanged();
-                     //   Toast.makeText(MainActivity.this, "withdraw is "+c.getWithdraw(), Toast.LENGTH_LONG).show();
                         playBeep();
-                        //   changeWithdraw(c);
-                        // adapter2.thread.start();
-//                try{
-//                    Thread.sleep(3000);
-//                }catch (Exception e){
-//
-//                }
-//                listContent.get(listContent.size()-1).setWithdraw(false);
-//                adapter2.notifyDataSetChanged();
-//                Toast.makeText(MainActivity.this, "change withdraw boolean value", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -893,26 +888,12 @@ Activity activity=MainActivity.this;
                     public void run() {
                         listContent.get(i).setWithdraw(false);
                         adapter2.notifyDataSetChanged();
-                     //   Toast.makeText(MainActivity.this, "withdraw is " + c.getWithdraw(), Toast.LENGTH_LONG).show();
                     }
                 });
 
             }
         }).start();
 
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try{
-//                    Thread.sleep(3000);
-//                }catch (Exception e){
-//
-//                }
-//                listContent.get(listContent.size()-1).setWithdraw(false);
-//                adapter2.notifyDataSetChanged();
-//                Toast.makeText(MainActivity.this, "withdraw is "+c.getWithdraw(), Toast.LENGTH_LONG).show();
-//            }
-//        });
     }
 
 
