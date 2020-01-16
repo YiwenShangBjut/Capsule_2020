@@ -79,4 +79,6 @@
     <string name="shake_tip_err">什么都没摇到</string>
     <string name="name_cant_empty">违规昵称，请重新输入！</string>
     <string name="btn_save_ok">修改成功</string>
+    <string name="btn_nameSave_ok">昵称修改成功</string>
+    <string name="btn_imageSave_ok">头像修改成功</string>
 </resources>

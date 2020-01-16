@@ -85,14 +85,14 @@ public class ChangeHeadImageActivity extends BaseActivity {
             public void onClick(View v) {
                 if (headImage > 0) {
                     headImageString = headImage + "";
-                    SharedPreferences.Editor editor = getSharedPreferences("MyChange", MODE_PRIVATE).edit();
-                    editor.putInt("MyChange", headImage);
-                    editor.apply();
-                    finish();
-//                    Intent intent = new Intent(ChangeHeadImageActivity.this, PersonalizedActivity.class);
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    Toast.makeText(ChangeHeadImageActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
-//                    startActivity(intent);
+                    Intent intent=new Intent(ChangeHeadImageActivity.this,PersonalizedActivity.class);
+                    intent.putExtra("imageChangeNotStored",headImageString);
+                   setResult(RESULT_OK,intent);
+                   finish();
+//                    SharedPreferences.Editor editor = getSharedPreferences("MyChange", MODE_PRIVATE).edit();
+//                    editor.putInt("MyChange", headImage);
+//                    editor.apply();
+//                    finish();
                     Log.e("Tag1", "headImageString in click" + headImageString);
                 }
                 finish();

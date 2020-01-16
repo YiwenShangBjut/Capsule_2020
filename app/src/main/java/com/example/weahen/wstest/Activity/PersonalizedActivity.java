@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -53,12 +54,28 @@ public class PersonalizedActivity extends BaseActivity {
     private ImageView ivAvatar;
     private EditText etNick;
     private String uid;
+    String imageChangeNotStored;
+    int int_imageChangeNotStored;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode) {
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    imageChangeNotStored = data.getStringExtra("imageChangeNotStored");
+                    Log.e("Tag","从头像选者中传回来的头像id"+imageChangeNotStored);
+                    int_imageChangeNotStored = Integer.parseInt(imageChangeNotStored);
+                }
+                break;
+                default:
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personalized);
-        Log.e("Tag",TAG+"onCreate");
+        Log.e("Tag", TAG + "onCreate");
         initTitle("个性化设置");
         initUid();
         //初始化我的头像
@@ -71,7 +88,8 @@ public class PersonalizedActivity extends BaseActivity {
         btnchangeheadimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PersonalizedActivity.this, ChangeHeadImageActivity.class));
+                Intent intent1 = new Intent(PersonalizedActivity.this, ChangeHeadImageActivity.class);
+                startActivityForResult(intent1, 1);
             }
         });
 
@@ -82,28 +100,59 @@ public class PersonalizedActivity extends BaseActivity {
                 //       SharedPreferencesUtil sp = new SharedPreferencesUtil(PersonalizedActivity.this.getApplicationContext());
                 //      sp.writeData("nick", etNick.getText().toString());
                 SharedPreferences.Editor editor = getSharedPreferences("id", MODE_PRIVATE).edit();
-                if (etNick.getText().toString().trim().length() == 0 || etNick.getText().toString().trim().length() >= 10) {
-                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
-                    etNick.setText("");
-                    Toast.makeText(PersonalizedActivity.this, R.string.name_cant_empty, Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
+                SharedPreferences.Editor editorImage = getSharedPreferences("MyChange", MODE_PRIVATE).edit();
+                int inputName = etNick.getText().toString().trim().length();
+                //当只修改昵称
+                if (inputName > 0 && int_imageChangeNotStored == 0) {
                     editor.putString("id", etNick.getText().toString().trim());
                     editor.apply();
-                    initName();
+                    Toast.makeText(PersonalizedActivity.this, R.string.btn_nameSave_ok, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                //只修改头像
+                else if (inputName == 0 && int_imageChangeNotStored != 0) {
+                    editorImage.putString("MyChange", imageChangeNotStored);
+                    editorImage.apply();
+                    Toast.makeText(PersonalizedActivity.this, R.string.btn_imageSave_ok, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                //昵称头像同时修改
+                else if (inputName > 0 && int_imageChangeNotStored != 0) {
+                    editor.putString("id", etNick.getText().toString().trim());
+                    editor.apply();
+                    editorImage.putString("MyChange", imageChangeNotStored);
+                    editorImage.apply();
                     Toast.makeText(PersonalizedActivity.this, R.string.btn_save_ok, Toast.LENGTH_SHORT).show();
                     finish();
                 }
+                //什么都不做
+                else {
+                    finish();
+                }
+//                if (inputName== 0 || etNick.getText().toString().trim().length() >= 10) {
+//                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
+//                    etNick.setText("");
+//                    Toast.makeText(PersonalizedActivity.this, R.string.name_cant_empty, Toast.LENGTH_SHORT).show();
+//                } else {
+//                    Log.e("Tag1", "personalization 输入框的输入  " + etNick.getText().toString());
+//                    editor.putString("id", etNick.getText().toString().trim());
+//                    editor.apply();
+//                    initName();
+//                    Toast.makeText(PersonalizedActivity.this, R.string.btn_save_ok, Toast.LENGTH_SHORT).show();
+//                    finish();
+//                }
             }
         });
 
-      
+
     }
 
     private void initImage() {
         CircleImageView myHeadImage = findViewById(R.id.myHeadImage);
         SharedPreferences myimage = getSharedPreferences("MyChange", MODE_PRIVATE);
-        int i = myimage.getInt("MyChange", 2131230974);
+        String imageinit = myimage.getString("MyChange", "2131230974");
+//        int i = myimage.getInt("MyChange", 2131230974);
+        int i = Integer.parseInt(imageinit);
         myHeadImage.setImageResource(i);
     }
 
@@ -165,31 +214,32 @@ public class PersonalizedActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.e("Tag",TAG+"onDestroy");
+        Log.e("Tag", TAG + "onDestroy");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.e("Tag",TAG+"onStart");
+        Log.e("Tag", TAG + "onStart");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.e("Tag",TAG+"onRestart");
+
+        Log.e("Tag", TAG + "onRestart");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        initImage();
-        Log.e("Tag",TAG+"onResume");
+//        initImage();
+        Log.e("Tag", TAG + "onResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("Tag",TAG+"onPause");
+        Log.e("Tag", TAG + "onPause");
     }
 }

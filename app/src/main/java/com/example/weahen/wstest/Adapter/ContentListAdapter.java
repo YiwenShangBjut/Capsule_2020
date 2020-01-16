@@ -151,7 +151,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
         int i = Integer.parseInt(m.getHeadImage());
         Log.e("Tag1", "i" + i);
-       // imageSend.setImageResource(i);
+       imageSend.setImageResource(i);
 //显示时间
         TextView txtTime = convertView.findViewById(R.id.getCurrentTime);
         txtTime.setText(m.getTime());

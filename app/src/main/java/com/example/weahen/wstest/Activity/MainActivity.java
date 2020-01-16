@@ -286,24 +286,24 @@ public class MainActivity extends BaseActivity {
         });
 
         mStompClient.connect();
-        SharedPreferences.Editor editor = getSharedPreferences("head", MODE_PRIVATE).edit();
-        Log.e("Tag1", "mainActivity  headImageString  " + ChangeHeadImageActivity.headImageString);
-        String mainHeadImage = ChangeHeadImageActivity.headImageString;
-        //使用持久化技术保存修改的图片资源ID
-        if (mainHeadImage != null) {
-            editor.putString("head", mainHeadImage);
-            editor.apply();
-        }
-        SharedPreferences pre = getSharedPreferences("head", MODE_PRIVATE);
-        uid = uid + pre.getString("head", "2131230974");
-        Log.e("Tag1", "uid in pinjie  " + uid);
+//        SharedPreferences.Editor editor = getSharedPreferences("MyChange", MODE_PRIVATE).edit();
+//        Log.e("Tag1", "mainActivity  headImageString  " + ChangeHeadImageActivity.headImageString);
+//        String mainHeadImage = ChangeHeadImageActivity.headImageString;
+//        //使用持久化技术保存修改的图片资源ID
+//        if (mainHeadImage != null) {
+//            editor.putString("MyChange", mainHeadImage);
+//            editor.apply();
+//        }
+        SharedPreferences pre = getSharedPreferences("MyChange", MODE_PRIVATE);
+        uid = uid + pre.getString("MyChange", "2131230974");
+        Log.e("Tag1", "拼接头像后的uid  " + uid);
 
         SharedPreferences idpre = getSharedPreferences("id", MODE_PRIVATE);
 
         String t = idpre.getString("id", uid.substring(0, 5));
         Log.e("Tag1", "main中拼接前键值对中的值  " + t);
         uid = uid + idpre.getString("id", uid.substring(0, 5));
-        Log.e("Tag1", "main中拼接后uid的值  " + uid);
+        Log.e("Tag1", "main中拼接用户昵称uid的值  " + uid);
 
         //设置发送按钮的点击状态和事件
         btnSend.setEnabled(false);
@@ -353,7 +353,7 @@ public class MainActivity extends BaseActivity {
 //             }
 //         });
 
-Activity activity=MainActivity.this;
+
         listContent = new ArrayList<Content>();
         adapter2 = new ContentListAdapter(this, listContent,this);
         listViewMessages.setAdapter(adapter2);
