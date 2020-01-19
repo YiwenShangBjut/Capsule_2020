@@ -104,6 +104,7 @@ public class HistoryActivity extends BaseActivity {
                if (Integer.valueOf(IsPic).intValue() == 0) {//text
                    Log.e("History", "text");
                    Content content = new Content(curTime,uid, Content, isself, false,imageId,nickName);
+                   content.setWithdraw(false);
                    content.setShaCode(shaCode);
                    contentList.add(content);
                } else { //image
