@@ -103,14 +103,14 @@ public class HistoryActivity extends BaseActivity {
                 Log.e("History","isSelf is "+isself);
                if (Integer.valueOf(IsPic).intValue() == 0) {//text
                    Log.e("History", "text");
-                   Content content = new Content(curTime,uid, Content, isself, false,imageId,nickName);
+                   Content content = new Content(curTime,nickName, Content, isself, false,imageId,nickName,uid);
                    content.setWithdraw(false);
                    content.setShaCode(shaCode);
                    contentList.add(content);
                } else { //image
                    Log.e("History", "pic");
                    Bitmap bp = BitmapFactory.decodeFile(Pic);
-                   Content content = new Content(curTime,uid, bp, isself, true,imageId,nickName);
+                   Content content = new Content(curTime,nickName, bp, isself, true,imageId,nickName,uid);
                    content.setShaCode(shaCode);
                    contentList.add(content);
                }

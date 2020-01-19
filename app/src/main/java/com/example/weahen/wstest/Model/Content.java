@@ -17,6 +17,7 @@ private String headImage;
 private String userName;
 private String time;
 private boolean withdraw;
+private String nickname;
     public Content() {
     }
 
@@ -33,8 +34,8 @@ private boolean withdraw;
 //        this.isSelf = isSelf;
 //    }
 
-    public Content( String time,String uid,String content,boolean isSelf,boolean isPicture,String headImage,String userName) {
-        this.uid = uid;
+    public Content( String time,String nickname,String content,boolean isSelf,boolean isPicture,String headImage,String userName, String uid) {
+        this.nickname = nickname;
         this.content = content;
         this.isSelf = isSelf;
         this.isPicture = isPicture;
@@ -42,16 +43,27 @@ private boolean withdraw;
         this.userName=userName;
         this.time = time;
         this.withdraw=true;
+        this.uid = uid;
     }
 
-    public Content( String time,String uid,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName) {
+    public Content( String time,String nickname,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName,String uid) {
         this.uid = uid;
+        this.nickname = nickname;
         this.picture = picture;
         this.isSelf = isSelf;
         this.isPicture = isPicture;
         this.headImage=headImage;
         this.userName=userName;
         this.time = time;
+        this.withdraw=true;
+        this.uid = uid;
+    }
+    public void setNickname(String userName) {
+        this.nickname = nickname;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 
     public void setUserName(String userName) {

@@ -130,10 +130,12 @@ public class MainActivity extends BaseActivity {
     String name, path;
     String uid;
     String field;
+    String mid;
     public static String NAME = "";          //连接WiFi名称
     public static String macAddress;     //连接WiFi的MAC
 
     private Timer timer;
+    private String onClickedMid;
 
     String getMacresult = "";
     String uploadfile_result;
@@ -154,6 +156,7 @@ public class MainActivity extends BaseActivity {
     private AlertDialog textSelectDialog;
     private Content clickedItem;
     private int clickedItemPosition;
+    private String withdrawedMid;
 
     private static final String TAG = "uploadFile";
     private static final int TIME_OUT = 10 * 1000; // 超时时间
@@ -180,10 +183,11 @@ public class MainActivity extends BaseActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             //    Content c = new Content(nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, (Bitmap) msg.obj, isSelf, isPicture,headImage,userName);
-            Content c = new Content(currTime, uid, (Bitmap) msg.obj, isSelf, isPicture, headImage, userName);
+            Content c = new Content(currTime, nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, (Bitmap) msg.obj, isSelf, isPicture, headImage, userName,RecevierUID);
             String path = storePic((Bitmap) msg.obj);
             Log.e("Main", "handle Message: store a pic into db");
             Log.e("Main", "path is " + path);
+           // if(uid)
             store2Db(c, path);
             //   chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), pictureName, true, name));
         }
@@ -286,14 +290,7 @@ public class MainActivity extends BaseActivity {
         });
 
         mStompClient.connect();
-//        SharedPreferences.Editor editor = getSharedPreferences("MyChange", MODE_PRIVATE).edit();
-//        Log.e("Tag1", "mainActivity  headImageString  " + ChangeHeadImageActivity.headImageString);
-//        String mainHeadImage = ChangeHeadImageActivity.headImageString;
-//        //使用持久化技术保存修改的图片资源ID
-//        if (mainHeadImage != null) {
-//            editor.putString("MyChange", mainHeadImage);
-//            editor.apply();
-//        }
+
         SharedPreferences pre = getSharedPreferences("MyChange", MODE_PRIVATE);
         uid = uid + pre.getString("MyChange", "2131230974");
         Log.e("Tag1", "拼接头像后的uid  " + uid);
@@ -323,8 +320,9 @@ public class MainActivity extends BaseActivity {
                         @Override
                         public void onClick(View v) {
                             time = String.valueOf(new Date().getTime());
-                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString())).subscribe();
-                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString()));
+                            mid=uid+currTime;
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputMsg.getText().toString())).subscribe();
+                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputMsg.getText().toString()));
 
                             inputMsg.setText("");
 
@@ -340,20 +338,6 @@ public class MainActivity extends BaseActivity {
             }
         };
         inputMsg.addTextChangedListener(textWatcher);
-
-//        btnSend.setOnClickListener(new View.OnClickListener() {
-//             @Override
-//             public void onClick(View v) {
-//                 time = String.valueOf(new Date().getTime());
-//                 mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString())).subscribe();
-//                 Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, inputMsg.getText().toString()));
-//
-//                 inputMsg.setText("");
-//
-//             }
-//         });
-
-
         listContent = new ArrayList<Content>();
         adapter2 = new ContentListAdapter(this, listContent,this);
         listViewMessages.setAdapter(adapter2);
@@ -372,6 +356,7 @@ public class MainActivity extends BaseActivity {
                 //判断点击类型
                 clickedItem = listContent.get(i);
                 clickedItemPosition = i;
+                onClickedMid=uid+clickedItem.getTime();
                 if (clickedItem.isPicture()) {
                     if (picSelectDialog == null) {
                         @SuppressLint("InflateParams") View rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_pic_dialog, null);
@@ -390,6 +375,7 @@ public class MainActivity extends BaseActivity {
                         @SuppressLint("InflateParams") View rootView;
                         if(clickedItem.getWithdraw()){
                             rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_withdraw_dialog, null);
+                            rootView.findViewById(R.id.withdraw_text).setOnClickListener(onWithdrawTextListener);
                         }else{
                             rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_dialog, null);
                         }
@@ -421,119 +407,10 @@ public class MainActivity extends BaseActivity {
 
             }
         }, 0);
-//        refreshableView.setOnRefreshListener(new RefreshableView.PullToRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        /*List<ChatContent> chatContents = chatContentDao.queryBuilder().where(ChatContentDao.Properties.ChatRoom.eq(name)).list();
-//                        List<Content> temp = new ArrayList<>();
-//                        for (ChatContent item : chatContents) {
-//                            if (item.isPicture()){
-//                                try {
-//                                    String path = "http://39.106.39.49:8888/getImg/" + item.getPicture();
-//                                    //2:把网址封装为一个URL对象
-//                                    URL url = new URL(path);
-//                                    //3:获取客户端和服务器的连接对象，此时还没有建立连接
-//                                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//                                    //4:初始化连接对象
-//                                    conn.setRequestMethod("POST");
-//                                    //设置连接超时
-//                                    conn.setConnectTimeout(8000);
-//                                    //设置读取超时
-//                                    conn.setReadTimeout(8000);
-//                                    //5:发生请求，与服务器建立连接
-//                                    conn.connect();
-//                                    //如果响应码为200，说明请求成功
-//                                    Log.e("responseCode", conn.getResponseCode() + "");
-//
-//                                    if (conn.getResponseCode() == 200) {
-//                                        //获取服务器响应头中的流
-//                                        InputStream is = conn.getInputStream();
-//                                        //读取流里的数据，构建成bitmap位图
-//                                        Bitmap bm = BitmapFactory.decodeStream(is);
-//
-//                                        int degree = readPictureDegree(path);
-//                                        Log.e("接收图片的degree", degree + "");
-//                                        Bitmap resized_bm = rotateImageView(degree, bm);
-//
-//                                        temp.add(new Content(item.getUid(), resized_bm, item.getIsSelf(), item.isPicture()));
-//                                    }
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }else {
-//                                temp.add(new Content(item.getUid(), item.getContent(), item.getIsSelf(), item.isPicture()));
-//                            }
-//                        }
-//                        listContent.addAll(0, temp);
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                adapter2.notifyDataSetChanged();
-//                                refreshableView.finishRefreshing();
-//                            }
-//                        });*/
-//                        refreshableView.finishRefreshing();
-//                    }
-//                }).start();
-//            }
-//        }, 0);
+    }
 
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<ChatContent> chatContents = chatContentDao.queryBuilder().where(ChatContentDao.Properties.ChatRoom.eq(name)).list();
-//                List<Content> temp = new ArrayList<>();
-//                for (ChatContent item : chatContents) {
-//                    if (item.isPicture()) {
-//                        try {
-//                            String path = "http://39.106.39.49:8888/getImg/" + item.getPicture();
-//                            //2:把网址封装为一个URL对象
-//                            URL url = new URL(path);
-//                            //3:获取客户端和服务器的连接对象，此时还没有建立连接
-//                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//                            //4:初始化连接对象
-//                            conn.setRequestMethod("POST");
-//                            //设置连接超时
-//                            conn.setConnectTimeout(8000);
-//                            //设置读取超时
-//                            conn.setReadTimeout(8000);
-//                            //5:发生请求，与服务器建立连接
-//                            conn.connect();
-//                            //如果响应码为200，说明请求成功
-//                            Log.e("responseCode", conn.getResponseCode() + "");
-//
-//                            if (conn.getResponseCode() == 200) {
-//                                //获取服务器响应头中的流
-//                                InputStream is = conn.getInputStream();
-//                                //读取流里的数据，构建成bitmap位图
-//                                Bitmap bm = BitmapFactory.decodeStream(is);
-//
-//                                int degree = readPictureDegree(path);
-//                                Log.e("接收图片的degree", degree + "");
-//                                Bitmap resized_bm = rotateImageView(degree, bm);
-//
-//                                temp.add(new Content(item.getUid(), resized_bm, item.getIsSelf(), item.isPicture()));
-//                            }
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    } else {
-//                        temp.add(new Content(item.getUid(), item.getContent(), item.getIsSelf(), item.isPicture()));
-//                    }
-//                }
-//                listContent.addAll(0, temp);
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        adapter2.notifyDataSetChanged();
-//                    }
-//                });
-//            }
-//        }).start();
+    public void withdraw(){
+        mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON("", "", "", path, 0, String.valueOf(-2), "", onClickedMid)).subscribe();
     }
 
     private void dismissTextSelectDialog() {
@@ -541,6 +418,14 @@ public class MainActivity extends BaseActivity {
             textSelectDialog.dismiss();
         }
     }
+
+    private View.OnClickListener onWithdrawTextListener=new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            dismissTextSelectDialog();
+            withdraw();
+        }
+    };
 
     private View.OnClickListener onDeleteTextListener = new View.OnClickListener() {
         @Override
@@ -671,64 +556,72 @@ public class MainActivity extends BaseActivity {
             content = jObj.getString("content");
 
             RecevierUID = jObj.getString("uid");
-            Log.e("Tag1", "RecevierUID  " + RecevierUID);
-            headImage = RecevierUID.substring(40, 50);
-            Log.e("Tag1", "headImage   " + headImage);
+            if (RecevierUID.equals("-2")) {
+                withdrawedMid=content;
+                for(int i=0;i<listContent.size();i++){
+                    if(withdrawedMid.equals(listContent.get(i).getUid()+listContent.get(i).getTime())){
+                        myDbHelper.deleteChatData(listContent.get(i).getShaCode(), TABLE_NAME_CHAT);
+                        listContent.remove(i);
+                        adapter2.notifyDataSetInvalidated();
+                    }
+                }
+
+            } else {
+
+                Log.e("Tag1", "RecevierUID  " + RecevierUID);
+                headImage = RecevierUID.substring(40, 50);
+
+                Log.e("Tag1", "headImage   " + headImage);
 //           time = jObj.getString("time");
-            currTime = jObj.getString("time");
-            userName = RecevierUID.substring(50);
+                currTime = jObj.getString("time");
+                userName = RecevierUID.substring(50);
+
+                isSelf = true;
+
+                //检查聊天室是不是到时间了
+                String time_is_up = "0";
+                if (RecevierUID.equals(time_is_up)) {
+                    Log.e("这里的uid为0", RecevierUID);
+                    showDialog();
+                    mStompClient.disconnect();
+
+                }
+
+                //聊天室在线人数
+                String ONLINE = "-1";
+                if (RecevierUID.equals(ONLINE)) {
+                    Log.e("这里的uid为-1", RecevierUID);
+                    online = content;
+
+                }
+
+                // 检查消息是不是有自己发出的
+                if (!(uid.equals(RecevierUID))) {
+                    isSelf = false;
+                }
 
 
-            isSelf = true;
+                Log.e("这里是content", content);
 
-            //检查聊天室是不是到时间了
-            String time_is_up = "0";
-            if (RecevierUID.equals(time_is_up)) {
-                Log.e("这里的uid为0", RecevierUID);
-                showDialog();
-                mStompClient.disconnect();
+                //如果content是图片消息
+                if (content.contains("#")) {
+                    Log.e("wswsPic", "这里是图片消息");
+                    isPicture = true;
+                    pictureName = content.substring(2, content.length() - 1);
+                    time = String.valueOf(new Date().getTime());
+                    Log.e("wswsPic", pictureName);
+                    new download_picture().start();
+                } else { //如果congtent是文字消息
+                    isPicture = false;
+                    Log.e("wswsText", "这里是文字消息");
+                    Content c = new Content(currTime, nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, content, isSelf, isPicture, headImage, userName,RecevierUID);
+                    store2Db(c, "");
 
+                }
             }
-
-            //聊天室在线人数
-            String ONLINE = "-1";
-            if (RecevierUID.equals(ONLINE)) {
-                Log.e("这里的uid为-1", RecevierUID);
-                online = content;
-
+            } catch(JSONException e){
+                e.printStackTrace();
             }
-
-            // 检查消息是不是有自己发出的
-            if (!(uid.equals(RecevierUID))) {
-                isSelf = false;
-            }
-
-//            Content c = new Content(time,content,isSelf);
-//             Content c = new Content(content,isSelf);
-
-            Log.e("这里是content", content);
-
-            //如果content是图片消息
-            if (content.contains("#")) {
-                Log.e("wswsPic", "这里是图片消息");
-                isPicture = true;
-                pictureName = content.substring(2, content.length() - 1);
-                time = String.valueOf(new Date().getTime());
-                Log.e("wswsPic", pictureName);
-                new download_picture().start();
-            } else { //如果congtent是文字消息
-                isPicture = false;
-                Log.e("wswsText", "这里是文字消息");
-                Content c = new Content(currTime, nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, content, isSelf, isPicture, headImage, userName);
-//                appendMessage(c);
-                store2Db(c, "");
-                // chatContentDao.insert(new ChatContent(c.getContent(), "", c.isSelf(), c.getUid(), "", false, name));
-            }
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
 
     }
@@ -826,21 +719,6 @@ public class MainActivity extends BaseActivity {
             } else {
                 Log.e("MainActivity", "shacode exist!");
             }
-//            if(picturePath==""){
-//                if(!stringExist(code, shaCodeList)){
-//                    Log.e("MainActivity","store text chat content into db");
-//                    myDbHelper.insertChatData(contentValues, dbw);
-//                }else{
-//                    Log.e("MainActivity","shacode exist!");
-//                }
-//            }else{
-//                if(!stringExist(picturePath, picPathList)){
-//                    Log.e("MainActivity","store pic chat content into db");
-//                    myDbHelper.insertChatData(contentValues, dbw);
-//                }else{
-//                    Log.e("MainActivity","photopath exist!");
-//                }
-//            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -886,8 +764,11 @@ public class MainActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        listContent.get(i).setWithdraw(false);
-                        adapter2.notifyDataSetChanged();
+                        if(i<listContent.size()){
+                            listContent.get(i).setWithdraw(false);
+                            adapter2.notifyDataSetChanged();
+                        }
+
                     }
                 });
 
@@ -1209,7 +1090,8 @@ public class MainActivity extends BaseActivity {
 
                             String pictureCONTENT = "#(" + file.getName() + ")";
                             Log.e(TAG, pictureCONTENT);
-                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, getNewMac(), name, path, id, uid, pictureCONTENT)).subscribe();
+                            mid=uid+currTime;
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, getNewMac(), name, path, id, uid, mid, pictureCONTENT)).subscribe();
 
                         } else {
                             Log.e(TAG, "request error");

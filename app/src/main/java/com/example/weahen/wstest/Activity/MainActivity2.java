@@ -143,8 +143,8 @@ public class MainActivity2 extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON( currTime,mac,name,path,id,uid,inputMsg.getText().toString())).subscribe();
-                Log.e("WSWS",  utils.getSendMessageJSON(currTime,mac,name,path,id,uid,inputMsg.getText().toString()));
+//                mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON( currTime,mac,name,path,id,uid,inputMsg.getText().toString())).subscribe();
+//                Log.e("WSWS",  utils.getSendMessageJSON(currTime,mac,name,path,id,uid,inputMsg.getText().toString()));
 
                 inputMsg.setText("");
 
@@ -211,8 +211,8 @@ public class MainActivity2 extends BaseActivity {
 
 //           Content c = new Content(time,content,isSelf);
 //            Content c = new Content(content,isSelf);
-            Content c = new Content(currTime,RecevierUID.substring(0,10),content,isSelf,isPicture,headImage,userId);
-            appendMessage(c);
+          //  Content c = new Content(currTime,RecevierUID.substring(0,10),content,isSelf,isPicture,headImage,userId);
+         //   appendMessage(c);
 
 
         } catch (JSONException e) {

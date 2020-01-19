@@ -140,16 +140,16 @@ public class RefreshViewActivity  extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-               Intent intent = new Intent(RefreshViewActivity.this, MainActivity2.class);
+              // Intent intent = new Intent(RefreshViewActivity.this, MainActivity2.class);
 
-                Bundle bundle = new Bundle();
-                bundle.putString("name", room_NAME[position]);
-                bundle.putString("path", room_PATH[position]);
-                intent.putExtra("bun", bundle);
-
-                requestPermisson();
-
-                startActivity(intent);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("name", room_NAME[position]);
+//                bundle.putString("path", room_PATH[position]);
+//                intent.putExtra("bun", bundle);
+//
+//                requestPermisson();
+//
+//                startActivity(intent);
 
 
             }

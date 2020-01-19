@@ -70,7 +70,7 @@ public class Utils {
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public String getSendMessageJSON(String time,String macAddress,String name, String path, int id, String uid, String content) {
+    public String getSendMessageJSON(String time,String macAddress,String name, String path, int id, String uid, String mid, String content) {
         String json = null;
 
         try {
@@ -80,6 +80,7 @@ public class Utils {
             jObj.put("id", id);
             jObj.put("name", name);
             jObj.put("uid", uid);
+            jObj.put("mid", mid);
             jObj.put("content", content);
             jObj.put("time", getTime());
             jObj.put("mac", macAddress);

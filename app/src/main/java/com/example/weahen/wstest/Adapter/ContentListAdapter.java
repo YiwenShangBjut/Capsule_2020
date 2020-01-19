@@ -37,6 +37,8 @@ import com.example.weahen.wstest.Obj.ImageWidgetInfoObj;
 import com.example.weahen.wstest.R;
 import com.example.weahen.wstest.widget.CircleImageView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -116,6 +118,13 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
                 if(contentItems.get(position).getWithdraw()){
                     convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
+//                    TextView withdraw=convertView.findViewById(R.id.withdraw_text);
+//                    withdraw.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            (MainActivity)activity.
+//                        }
+//                    });
                 } else{
                     convertView = mInflater.inflate(R.layout.list_item_message_right, null);
                 }
