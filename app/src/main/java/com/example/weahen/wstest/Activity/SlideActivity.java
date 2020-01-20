@@ -194,8 +194,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                             contentValues.put(COLUMN_NAME_RESRTVE, String.valueOf(RESERVE[i]));
                             contentValues.put(COLUMN_NAME_FIELD, FIELD[i]);
                             contentValues.put(COLUMN_NAME_LOCATION, location[i]);
-                            contentValues.put(COLUMN_NAME_STARTTIME, startTime);
-                            contentValues.put(COLUMN_NAME_ENDTIME, endTime);
+                            contentValues.put(COLUMN_NAME_STARTTIME, "");
+                            contentValues.put(COLUMN_NAME_ENDTIME, "");
 
                             myDbHelper.insertRoomData(contentValues, dbw);
                             getRoomList();

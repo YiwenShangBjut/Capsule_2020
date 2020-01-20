@@ -12,6 +12,10 @@ import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_ISSE
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_PICTURE;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_UID;
 
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
+import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -158,6 +162,10 @@ public class MainActivity extends BaseActivity {
     private int clickedItemPosition;
     private String withdrawedMid;
 
+    private String enterTime;
+    private String exitTime;
+    private SimpleDateFormat format;
+
     private static final String TAG = "uploadFile";
     private static final int TIME_OUT = 10 * 1000; // 超时时间
     private static final String CHARSET = "utf-8"; // 设置编码
@@ -171,7 +179,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 获取的时间格式
      */
-    public static final String TIME_STYLE = "yyyyMMddHHmmss";
+    public static final String TIME_STYLE = "yyyy-MM-dd HH:mm:ss";
     /**
      * 图片种类
      */
@@ -233,6 +241,10 @@ public class MainActivity extends BaseActivity {
 
         SharedPreferencesUtil sp = new SharedPreferencesUtil(MainActivity.this.getApplicationContext());
         nick = sp.readData("nick", "");
+
+        format = new SimpleDateFormat(TIME_STYLE, Locale.getDefault());
+        Date date = new Date(System.currentTimeMillis());
+        enterTime = format.format(date);
 
         myDbHelper = MyDbOpenHelper.getInstance(this);
 
@@ -371,7 +383,7 @@ public class MainActivity extends BaseActivity {
                         picSelectDialog.show();
                     }
                 } else {
-                    if (textSelectDialog == null) {
+  //                  if (textSelectDialog == null) {
                         @SuppressLint("InflateParams") View rootView;
                         if(clickedItem.getWithdraw()){
                             rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_withdraw_dialog, null);
@@ -385,9 +397,9 @@ public class MainActivity extends BaseActivity {
                         builder.setView(rootView);
                         textSelectDialog = builder.create();
                         textSelectDialog.show();
-                    } else {
-                        textSelectDialog.show();
-                    }
+//                    } else {
+//                        textSelectDialog.show();
+//                    }
                 }
 
             }
@@ -649,6 +661,14 @@ public class MainActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         Log.e("MainActivity", "onPause");
+        Date date = new Date(System.currentTimeMillis());
+        exitTime = format.format(date);
+
+        SQLiteDatabase dbw = myDbHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAME_STARTTIME,enterTime);
+        contentValues.put(COLUMN_NAME_ENDTIME,exitTime);
+        dbw.update(TABLE_NAME_ROOM,contentValues,"id=?",new String[]{String.valueOf(id)});
     }
 
     @Override
