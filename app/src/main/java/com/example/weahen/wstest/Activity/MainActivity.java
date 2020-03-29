@@ -574,7 +574,8 @@ public class MainActivity extends BaseActivity {
                     if(withdrawedMid.equals(listContent.get(i).getUid()+listContent.get(i).getTime())){
                         myDbHelper.deleteChatData(listContent.get(i).getShaCode(), TABLE_NAME_CHAT);
                         listContent.remove(i);
-                        adapter2.notifyDataSetInvalidated();
+                        adapter2.notifyDataSetChanged();
+                        //adapter2.notifyDataSetInvalidated();
                     }
                 }
 
