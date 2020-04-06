@@ -15,7 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +54,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
     private Activity activity;
     private List<Content> contentItems;
     public Thread thread;
+   // private static final int
 
     Content m;
     ImageView imageView;
@@ -66,7 +67,7 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
     public ContentListAdapter(Context context, List<Content> navDrawerItems, Activity activity) {
         this.context = context;
         this.contentItems = navDrawerItems;
-        this.activity=activity;
+        this.activity = activity;
     }
 
     @Override
@@ -79,6 +80,13 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
         return contentItems.get(position);
     }
 
+//    @Override
+//    public int getItemViewType(int position){
+//        if(!contentItems.get(position).isPicture()){
+//
+//        }
+//    }
+
     @Override
     public long getItemId(int position) {
         return position;
@@ -87,17 +95,18 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
     @SuppressLint("InflateParams")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        /**
-         * The following list not implemented reusable list items as list items
-         * are showing incorrect data Add the solution if you have one
-         * */
+        Log.e("ContentListAdapter","getView");
 
         m = contentItems.get(position);
 
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        Log.e("ContentListAdapter", "on position " + position);
+//        if(convertView!=null){
+//            Log.e("ContentListAdapter", "on position " + position + " convertView is "+convertView.toString()+" parent is "+parent.toString());
+//        }else{
+//            Log.e("ContentListAdapter", "on position " + position + " convertView is null "+" parent is "+parent.toString());
+//        }
 
-        Log.e("ContentListAdapter", "on position " + position + " isSelf is " + contentItems.get(position).isSelf());
         // 识别消息发送方
         if (contentItems.get(position).isSelf()) {
             // message belongs to you, so load the right aligned layout
@@ -106,26 +115,10 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
                 imageView = convertView.findViewById(R.id.bivPic);
                 imageView.setImageBitmap(m.getPicture());
 
-//               uri = Uri.parse(MediaStore.Images.Media.insertImage(context.getContentResolver(), m.getPicture(), null,null));
-//
-//                Log.e("uri",uri+"");
-//
-//                init();
-//                imageView.setOnClickListener(this);
-
-
             } else {
-
-                if(contentItems.get(position).getWithdraw()){
+                if (contentItems.get(position).getWithdraw()) {
                     convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
-//                    TextView withdraw=convertView.findViewById(R.id.withdraw_text);
-//                    withdraw.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            (MainActivity)activity.
-//                        }
-//                    });
-                } else{
+                } else {
                     convertView = mInflater.inflate(R.layout.list_item_message_right, null);
                 }
                 TextView txtMsg = convertView.findViewById(R.id.txtMsg);
@@ -151,8 +144,6 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
             }
         }
 
-
-
         TextView txtlblMsgFrom = convertView.findViewById(R.id.lblMsgFrom);
         txtlblMsgFrom.setText(m.getUserName());
         CircleImageView imageSend = convertView.findViewById(R.id.chat_item_header);
@@ -160,42 +151,13 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
 
         int i = Integer.parseInt(m.getHeadImage());
         Log.e("Tag1", "i" + i);
-       imageSend.setImageResource(i);
+        imageSend.setImageResource(i);
 //显示时间
         TextView txtTime = convertView.findViewById(R.id.getCurrentTime);
         txtTime.setText(m.getTime());
-        TextView withdraw=convertView.findViewById(R.id.chat_item_withdraw);
-
-
-
-//       thread = new Thread(new Runnable(){
-//            @Override
-//            public void run(){
-//              activity.runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try{
-//                            Thread.sleep(3000);
-//                        }catch (Exception e){
-//
-//                        }
-//                        withdraw.setVisibility(View.GONE);
-//                    }
-//                });
-//            }
-//        });
-
+        TextView withdraw = convertView.findViewById(R.id.chat_item_withdraw);
         return convertView;
     }
-//    private String getTime(){
-//
-//        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-//        Date curDate = new Date(System.currentTimeMillis());
-////获取当前时间
-//        String str = formatter.format(curDate);
-//        return str;
-//    }
-
     private void init() {
 
 

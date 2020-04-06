@@ -1,5 +1,6 @@
 package com.example.weahen.wstest.Activity;
 
+import static android.view.View.VISIBLE;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_AVATARID;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_NICKNAME;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_SHACODE;
@@ -58,7 +59,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -120,6 +123,7 @@ public class MainActivity extends BaseActivity {
     private static ImageView iv;
 
     private Button btnSend;
+    private ImageButton btnCancelRefer;
     private EditText inputMsg;
     private ListView listViewMessages;
     private Utils utils;
@@ -166,6 +170,9 @@ public class MainActivity extends BaseActivity {
     private String exitTime;
     private SimpleDateFormat format;
 
+    private TextView referText;
+    private LinearLayout referLayout;
+
     private static final String TAG = "uploadFile";
     private static final int TIME_OUT = 10 * 1000; // 超时时间
     private static final String CHARSET = "utf-8"; // 设置编码
@@ -208,7 +215,7 @@ public class MainActivity extends BaseActivity {
                 String macNow = getNewMac();
                 String macNowR1 = macNow.replace(":", "-");
                 String macNowR2 = macNowR1.toUpperCase();//转成大写
-                Log.e("10秒获取mac", macNowR2);
+               // Log.e("10秒获取mac", macNowR2);
 
                 //      Log.e("manNow在result里面吗", getMacresult.contains(macNowR2) + "");
                 if (!getMacresult.contains(macNowR2) && !enter) {
@@ -221,7 +228,7 @@ public class MainActivity extends BaseActivity {
 
                 }
                 if (getMacresult.contains(macNowR2)) {
-                    Log.e("Handler", "now enter is false");
+                    //Log.e("Handler", "now enter is false");
                     enter = false;
                 }
 
@@ -252,7 +259,18 @@ public class MainActivity extends BaseActivity {
         inputMsg = findViewById(R.id.inputMsg);
         utils = new Utils(getApplicationContext());
 
+        btnCancelRefer=findViewById(R.id.referButton);
+        referText=findViewById(R.id.referMsg);
+        referLayout=findViewById(R.id.referLayout);
+
         listViewMessages = findViewById(R.id.list_view_messages);
+
+        btnCancelRefer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                referLayout.setVisibility(View.INVISIBLE);
+            }
+        });
 
         Intent intent = getIntent();
         Bundle bundle = intent.getBundleExtra("bun");
@@ -331,12 +349,30 @@ public class MainActivity extends BaseActivity {
                     btnSend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            String text=inputMsg.getText().toString();
+                            if(referLayout.getVisibility()==VISIBLE){
+                                StringBuffer dash=new StringBuffer("--");
+                                int loop=1;
+                                if(clickedItem.getContent().startsWith("[")){
+                                    loop=clickedItem.getContent().split("-----")[clickedItem.getContent().split("-----").length-1].length();
+                                    //Log.e("MainActivity","reply messege is: "+clickedItem.getContent().split("]")[clickedItem.getContent().split("]").length-1]);
+                                    Log.e("MainActivity","reply loop is: "+loop);
+                                }else{
+                                    loop=clickedItem.getContent().length();
+                                }
+                                for(int i=0;i<loop;i++){
+                                    dash.append("----");
+                                }
+
+                                text="["+clickedItem.getContent()+"]"+"\n"+dash.toString()+"\n"+text;
+                            }
                             time = String.valueOf(new Date().getTime());
                             mid=uid+currTime;
-                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputMsg.getText().toString())).subscribe();
-                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputMsg.getText().toString()));
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, text)).subscribe();
+                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, text));
 
                             inputMsg.setText("");
+                            referLayout.setVisibility(View.INVISIBLE);
 
                         }
                     });
@@ -388,12 +424,15 @@ public class MainActivity extends BaseActivity {
                         if(clickedItem.getWithdraw()){
                             rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_withdraw_dialog, null);
                             rootView.findViewById(R.id.withdraw_text).setOnClickListener(onWithdrawTextListener);
+
                         }else{
                             rootView = LayoutInflater.from(MainActivity.this).inflate(R.layout.select_text_dialog, null);
+
                         }
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         rootView.findViewById(R.id.delete_text).setOnClickListener(onDeleteTextListener);
+                        rootView.findViewById(R.id.reply_text).setOnClickListener(onReplyTextListener);
                         builder.setView(rootView);
                         textSelectDialog = builder.create();
                         textSelectDialog.show();
@@ -425,6 +464,11 @@ public class MainActivity extends BaseActivity {
         mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON("", "", "", path, 0, String.valueOf(-2), "", onClickedMid)).subscribe();
     }
 
+    public void reply(String text){
+        referText.setText(text);
+        referLayout.setVisibility(VISIBLE);
+    }
+
     private void dismissTextSelectDialog() {
         if (textSelectDialog != null && textSelectDialog.isShowing()) {
             textSelectDialog.dismiss();
@@ -436,6 +480,14 @@ public class MainActivity extends BaseActivity {
         public void onClick(View v) {
             dismissTextSelectDialog();
             withdraw();
+        }
+    };
+    private View.OnClickListener onReplyTextListener=new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            dismissTextSelectDialog();
+            String text=clickedItem.getContent();
+            reply(text);
         }
     };
 
@@ -764,12 +816,25 @@ public class MainActivity extends BaseActivity {
                     public void run() {
                         listContent.add(c);
                         adapter2.notifyDataSetChanged();
+                        Log.e("MainActivity","index of c is "+listContent.indexOf(c));
+                       // updatedItem(listContent.size()-1);
+                        Log.e("MainActivity","appendMessage, after notifyDataSetChanged");
                         playBeep();
                     }
                 });
             }
         }).start();
 
+    }
+
+    private void updatedItem(int position){
+        int firstVisiblePosition=listViewMessages.getFirstVisiblePosition();
+        int lastVisiblePosition=listViewMessages.getLastVisiblePosition();
+        Log.e("MainActiviy","position is "+position+" firstVisiblePosition "+firstVisiblePosition+" lastVisiblePosition "+lastVisiblePosition);
+        if(position>=firstVisiblePosition && position<=lastVisiblePosition){
+            View view=listViewMessages.getChildAt(position-firstVisiblePosition);
+            adapter2.getView(position,view, listViewMessages);
+        }
     }
 
     private void changeWithdraw(int i){

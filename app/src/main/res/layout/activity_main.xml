@@ -59,6 +59,42 @@
     <!--android:text="发送"-->
     <!--/>-->
     <!--</LinearLayout>-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:id="@+id/referLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+           >
+            <ImageButton
+                android:id="@+id/referButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/icon_cancel"
+                android:layout_marginLeft="5dp"
+                />
+            <TextView
+                android:id="@+id/referMsg"
+                android:layout_above="@id/inputMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="here is long long long long long long long long long long long reference"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:minHeight="13dp"
+                android:paddingLeft="10dp"
+                android:textSize="13dp"
+
+                />
+
+        </LinearLayout>
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -147,6 +183,7 @@
             />
 
 
+    </LinearLayout>
     </LinearLayout>
 
 

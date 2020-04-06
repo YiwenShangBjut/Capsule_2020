@@ -78,7 +78,7 @@ public class MainActivity2 extends BaseActivity {
             super.handleMessage(msg);
             if (msg.what == 0) {
                 String macNow = getNewMac();
-                Log.e("10秒获取mac",macNow);
+               // Log.e("10秒获取mac",macNow);
 
             }
         }
@@ -198,7 +198,7 @@ public class MainActivity2 extends BaseActivity {
             //检查聊天室是不是到时间了
             String time_is_up = "0";
             if(RecevierUID.equals(time_is_up)){
-                Log.e("这里是=0",RecevierUID );
+              //  Log.e("这里是=0",RecevierUID );
                 showDialog();
                 mStompClient.disconnect();
 
