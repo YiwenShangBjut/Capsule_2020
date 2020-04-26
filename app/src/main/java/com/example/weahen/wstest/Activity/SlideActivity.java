@@ -161,13 +161,23 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 Log.e("这里是json",json);
                 Log.e("json.length",json.length()+"");
 
+
                 if(json.length()==0){
                     showDialog();//服务器返回的列表为空，弹窗提示用户换个位置重新刷新
                 }
 
+
+
                 try {
                     SQLiteDatabase dbw = myDbHelper.getWritableDatabase();
                     JSONArray been = new JSONArray(json);
+//                    name[0]="name1";
+//                    path[0] = "path1";
+//                    ID[0] = 1;
+//                    RESERVE[0] = 2;
+//                    FIELD[0] = "field";
+//                    location[0] = "location1";
+
                     for (int i = 0; i < been.length(); i++) {
                         JSONObject TopicListBean = been.getJSONObject(i);
                         name[i] = TopicListBean.getString("name");

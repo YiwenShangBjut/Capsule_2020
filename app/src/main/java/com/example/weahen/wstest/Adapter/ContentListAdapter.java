@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,8 +45,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.example.weahen.wstest.Utils.ListViewHeight.setListViewHeightBasedOnChildren;
 
 public class ContentListAdapter extends BaseAdapter implements View.OnClickListener {
 
@@ -116,14 +120,31 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
                 imageView.setImageBitmap(m.getPicture());
 
             } else {
-                if (contentItems.get(position).getWithdraw()) {
+//                if (contentItems.get(position).getWithdraw()) {
                     convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
-                } else {
-                    convertView = mInflater.inflate(R.layout.list_item_message_right, null);
-                }
-                TextView txtMsg = convertView.findViewById(R.id.txtMsg);
-                txtMsg.setText(m.getContent());
+                    TextView txtMsg = convertView.findViewById(R.id.txtMsg);
+                    txtMsg.setText(m.getContent());
+//                } else {
+//                    convertView = mInflater.inflate(R.layout.list_item_message_right, null);
+//                    TextView txtMsg = convertView.findViewById(R.id.txtMsg);
+//                    txtMsg.setText(m.getContent());
+//                }
 
+
+                if(contentItems.get(position).isHasReply()){
+                    Log.e("contentListAadapter","hasReply: "+contentItems.get(position).getReplyContent().toString());
+                    convertView = mInflater.inflate(R.layout.list_item_reply_right, null);
+                    ListView replyListView=convertView.findViewById(R.id.replay_right_listview);
+                    ArrayList<Content> replyListContent=contentItems.get(position).getReplyContent();
+                    for(int i=0;i<replyListContent.size();i++){
+                        Log.e("reply adapter: ","i is "+i+" reply content is"+replyListContent.get(i).getContent());
+                    }
+
+                    ReplyAdapter adapter=new  ReplyAdapter(activity, replyListContent, activity);
+                    replyListView.setAdapter(adapter);
+                    setListViewHeightBasedOnChildren(replyListView);
+                    return convertView;
+                }
 
             }
         } else {
@@ -139,7 +160,6 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
                 convertView = mInflater.inflate(R.layout.list_item_message_left, null);
                 TextView txtMsg = convertView.findViewById(R.id.txtMsg);
                 txtMsg.setText(m.getContent());
-
 
             }
         }

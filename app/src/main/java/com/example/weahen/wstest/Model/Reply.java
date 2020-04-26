@@ -7,25 +7,21 @@ import android.media.Image;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class Content {
+public class Reply extends Content{
     private String  content;
     private String shaCode;
     private boolean isSelf;
     private  String uid;
     private Bitmap picture;
     private boolean isPicture;
-private String headImage;
-private String userName;
-private String time;
-private boolean withdraw;
-private String nickname;
-private boolean hasReply;
-
-    private boolean isReply;
-private ArrayList<Content> replyContent=new ArrayList<>();
-
-
-    public Content() {
+    private String headImage;
+    private String userName;
+    private String time;
+    private boolean withdraw;
+    private String nickname;
+    private boolean hasReply;
+    private String ParentShaCode;
+    public Reply() {
     }
 
 
@@ -41,7 +37,7 @@ private ArrayList<Content> replyContent=new ArrayList<>();
 //        this.isSelf = isSelf;
 //    }
 
-    public Content( String time,String nickname,String content,boolean isSelf,boolean isPicture,String headImage,String userName, String uid) {
+    public Reply( String time,String nickname,String content,boolean isSelf,boolean isPicture,String headImage,String userName, String uid) {
         this.nickname = nickname;
         this.content = content;
         this.isSelf = isSelf;
@@ -52,10 +48,9 @@ private ArrayList<Content> replyContent=new ArrayList<>();
         this.withdraw=true;
         this.uid = uid;
         this.hasReply=false;
-        this.isReply=false;
     }
 
-    public Content( String time,String nickname,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName,String uid) {
+    public Reply( String time,String nickname,Bitmap picture,boolean isSelf,boolean isPicture,String headImage,String userName,String uid) {
         this.uid = uid;
         this.nickname = nickname;
         this.picture = picture;
@@ -67,8 +62,6 @@ private ArrayList<Content> replyContent=new ArrayList<>();
         this.withdraw=true;
         this.uid = uid;
         this.hasReply=false;
-        this.isReply=false;
-
     }
     public void setNickname(String userName) {
         this.nickname = nickname;
@@ -134,10 +127,10 @@ private ArrayList<Content> replyContent=new ArrayList<>();
         this.shaCode = time;
     }
 
-   public String getUid(){
+    public String getUid(){
         return  uid;
-   }
-   public void setUid(String uid){
+    }
+    public void setUid(String uid){
         this.uid = uid;
     }
 
@@ -164,25 +157,13 @@ private ArrayList<Content> replyContent=new ArrayList<>();
         this.hasReply = hasReply;
     }
 
-    public ArrayList<Content> getReplyContent(){
-        return replyContent;
-    }
-    public void addReply(Content c){
-        replyContent.add(c);
+    public String getParentShaCode() {
+        return ParentShaCode;
     }
 
-    public void removeReply(int i){
-        replyContent.remove(i);
+    public void setParentShaCode(String parentShaCode) {
+        ParentShaCode = parentShaCode;
     }
-
-    public boolean isReply() {
-        return isReply;
-    }
-
-    public void setReply(boolean reply) {
-        isReply = reply;
-    }
-
 }
 
 

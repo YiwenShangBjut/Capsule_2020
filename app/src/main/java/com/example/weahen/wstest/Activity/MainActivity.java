@@ -163,6 +163,7 @@ public class MainActivity extends BaseActivity {
     private AlertDialog picSelectDialog;
     private AlertDialog textSelectDialog;
     private Content clickedItem;
+    private Content repliedItem;
     private int clickedItemPosition;
     private String withdrawedMid;
 
@@ -314,7 +315,7 @@ public class MainActivity extends BaseActivity {
         mStompClient.topic(topicpath).subscribe(topicMessage -> {
             Log.e("WSWSonLine", topicMessage.getPayload());
 
-            new onLine().start();//获取在线人数
+            //new onLine().start();//获取在线人数
             parseMessage(topicMessage.getPayload());
 
         });
@@ -349,30 +350,25 @@ public class MainActivity extends BaseActivity {
                     btnSend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            String text=inputMsg.getText().toString();
+                            String inputText=inputMsg.getText().toString();
+                            String replyText="";
                             if(referLayout.getVisibility()==VISIBLE){
-                                StringBuffer dash=new StringBuffer("--");
-                                int loop=1;
-                                if(clickedItem.getContent().startsWith("[")){
-                                    loop=clickedItem.getContent().split("-----")[clickedItem.getContent().split("-----").length-1].length();
-                                    //Log.e("MainActivity","reply messege is: "+clickedItem.getContent().split("]")[clickedItem.getContent().split("]").length-1]);
-                                    Log.e("MainActivity","reply loop is: "+loop);
-                                }else{
-                                    loop=clickedItem.getContent().length();
-                                }
-                                for(int i=0;i<loop;i++){
-                                    dash.append("----");
-                                }
 
-                                text="["+clickedItem.getContent()+"]"+"\n"+dash.toString()+"\n"+text;
+                                clickedItem.setHasReply(true);
+                                repliedItem=clickedItem;
+
+//                                clickedItem.setContent(replyText);
+//                                adapter2.notifyDataSetChanged();
                             }
                             time = String.valueOf(new Date().getTime());
                             mid=uid+currTime;
-                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, text)).subscribe();
-                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, text));
+                            mStompClient.send("/app/chatroom" + path, utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputText)).subscribe();
+                            Log.e("btnSendOnClick", utils.getSendMessageJSON(currTime, mac, name, path, id, uid, mid, inputText));
 
                             inputMsg.setText("");
                             referLayout.setVisibility(View.INVISIBLE);
+
+
 
                         }
                     });
@@ -487,6 +483,7 @@ public class MainActivity extends BaseActivity {
         public void onClick(View v) {
             dismissTextSelectDialog();
             String text=clickedItem.getContent();
+
             reply(text);
         }
     };
@@ -680,7 +677,24 @@ public class MainActivity extends BaseActivity {
                     isPicture = false;
                     Log.e("wswsText", "这里是文字消息");
                     Content c = new Content(currTime, nick.isEmpty() ? RecevierUID.substring(0, 5) : nick, content, isSelf, isPicture, headImage, userName,RecevierUID);
-                    store2Db(c, "");
+
+                    if(clickedItem!=null){//收到的这条消息是repliedItem的reply,要对repliedItem进行操作
+                        if(clickedItem.getReplyContent().size()==0){//让自己成为回复列表里的第一行
+                            listContent.get(clickedItemPosition).addReply(clickedItem);
+
+                        }
+                        c.setReply(true);//把回复设置成回复
+                        listContent.get(clickedItemPosition).addReply(c);//把回复衔接在repliedItem上
+//                        listContent.get(clickedItemPosition).addReply(c);//把回复衔接在repliedItem上
+//                        listContent.get(clickedItemPosition).addReply(c);//把回复衔接在repliedItem上
+                        for(int i=0;i<listContent.get(clickedItemPosition).getReplyContent().size();i++){
+                            Log.e("Receive Reply ","i is "+i+" reply content is"+listContent.get(clickedItemPosition).getReplyContent().get(i).getContent());
+                        }
+                      //  adapter2.notifyDataSetChanged();
+                        clickedItem=null;
+
+                    }
+                    store2Db(c, "");//把回复内容存进数据库
 
                 }
             }
@@ -787,7 +801,7 @@ public class MainActivity extends BaseActivity {
                 myDbHelper.insertChatData(contentValues, dbw);
                 Log.e("MainActivity", "Before appendMessage, set shacode is " + code);
                 c.setShaCode(code);
-                appendMessage(c);
+                appendMessage(c);//存进数据库后判断要不要展示在列表里，如果是回复就不展示在主列表里
                 changeWithdraw(listContent.size());
             } else {
                 Log.e("MainActivity", "shacode exist!");
@@ -814,8 +828,12 @@ public class MainActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        listContent.add(c);
-                        adapter2.notifyDataSetChanged();
+                        if(!c.isReply()){
+                            listContent.add(c);
+                            adapter2.notifyDataSetChanged();
+                        }
+
+
                         Log.e("MainActivity","index of c is "+listContent.indexOf(c));
                        // updatedItem(listContent.size()-1);
                         Log.e("MainActivity","appendMessage, after notifyDataSetChanged");

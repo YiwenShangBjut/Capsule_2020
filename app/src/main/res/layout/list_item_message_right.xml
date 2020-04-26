@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
     android:id="@+id/ll_text_send"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="5dp">
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp">
 
     <TextView
         android:id="@+id/getCurrentTime"
@@ -61,12 +65,66 @@
                 android:id="@+id/txtMsg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+
+                android:paddingLeft="20dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
                 android:background="@drawable/message_text_send"
                 android:text="你好"
                 android:textColor="#333333"
                 android:textSize="14dp" />
 
+
+            <Button
+                android:id="@+id/reply_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:layout_marginHorizontal="-1dp"
+                android:layout_below="@+id/txtMsg"
+                android:background="@color/actionbar"
+                android:textColor="@color/white"
+                android:text="回复"
+                android:textStyle="bold"
+                android:textSize="10dp"
+                android:layout_marginTop="22dp"
+
+            />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="-24dp"
+                android:layout_marginLeft="-24dp"
+                >
+                <TextView
+                    android:id="@+id/reply_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3"
+                    android:layout_marginRight="5dp"
+                    />
+                <Button
+                    android:id="@+id/open_btn"
+                    android:layout_width="12dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:background="@color/actionbar"
+                    android:textColor="@color/white"
+                    android:text="+"
+                    android:textStyle="bold"
+                    android:textSize="10dp"
+                    />
+            </LinearLayout>
+
+
         </LinearLayout>
+
+
 
 <TextView
     android:id="@+id/chat_item_withdraw"
@@ -99,8 +157,9 @@
             android:layout_toLeftOf="@+id/chat_item_layout_content"
             android:visibility="invisible" />
     </RelativeLayout>
+    </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>
 
     <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
     <!--android:layout_width="match_parent"-->
