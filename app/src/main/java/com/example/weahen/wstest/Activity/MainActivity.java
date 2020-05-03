@@ -174,6 +174,8 @@ public class MainActivity extends BaseActivity {
     private TextView referText;
     private LinearLayout referLayout;
 
+    private LinearLayout mesTypeLayout;
+
     private static final String TAG = "uploadFile";
     private static final int TIME_OUT = 10 * 1000; // 超时时间
     private static final String CHARSET = "utf-8"; // 设置编码
@@ -263,6 +265,8 @@ public class MainActivity extends BaseActivity {
         btnCancelRefer=findViewById(R.id.referButton);
         referText=findViewById(R.id.referMsg);
         referLayout=findViewById(R.id.referLayout);
+
+        mesTypeLayout=findViewById(R.id.mesTypeLayout);
 
         listViewMessages = findViewById(R.id.list_view_messages);
 
@@ -1053,6 +1057,19 @@ public class MainActivity extends BaseActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         startActivityForResult(intent, PHOTO_REQUEST_GALLERY);
 
+    }
+
+    public void showMesType(View view){
+        if(mesTypeLayout.getVisibility()==View.GONE){
+            mesTypeLayout.setVisibility(VISIBLE);
+        }else{
+            mesTypeLayout.setVisibility(View.GONE);
+        }
+
+    }
+
+    public void Marquee(View view){
+        mesTypeLayout.setVisibility(View.GONE);
     }
 
 
