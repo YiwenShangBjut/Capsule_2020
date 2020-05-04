@@ -120,15 +120,15 @@ public class ContentListAdapter extends BaseAdapter implements View.OnClickListe
                 imageView.setImageBitmap(m.getPicture());
 
             } else {
-//                if (contentItems.get(position).getWithdraw()) {
+                if (contentItems.get(position).getWithdraw()) {
                     convertView = mInflater.inflate(R.layout.list_item_message_withdraw, null);
                     TextView txtMsg = convertView.findViewById(R.id.txtMsg);
                     txtMsg.setText(m.getContent());
-//                } else {
-//                    convertView = mInflater.inflate(R.layout.list_item_message_right, null);
-//                    TextView txtMsg = convertView.findViewById(R.id.txtMsg);
-//                    txtMsg.setText(m.getContent());
-//                }
+                } else {
+                    convertView = mInflater.inflate(R.layout.item_text_send, null);
+                    TextView txtMsg = convertView.findViewById(R.id.txtMsg);
+                    txtMsg.setText(m.getContent());
+                }
 
 
                 if(contentItems.get(position).isHasReply()){

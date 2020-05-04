@@ -47,12 +47,7 @@
             android:layout_alignParentLeft="true"
             android:scaleType="centerInside"
             android:src="@mipmap/ic_head_default_left"
-
             />
-
-
-
-
 
         <LinearLayout
             android:id="@+id/chat_item_layout_content"

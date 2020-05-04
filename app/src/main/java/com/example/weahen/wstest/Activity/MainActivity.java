@@ -81,6 +81,7 @@ import com.example.weahen.wstest.Utils.SharedPreferencesUtil;
 import com.example.weahen.wstest.Utils.Utils;
 import com.example.weahen.wstest.db.ChatContent;
 import com.example.weahen.wstest.db.MyDbOpenHelper;
+import com.example.weahen.wstest.widget.CircleImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -166,6 +167,9 @@ public class MainActivity extends BaseActivity {
     private Content repliedItem;
     private int clickedItemPosition;
     private String withdrawedMid;
+
+    private boolean isMarquee=false;
+    private LinearLayout marqueeLayout;
 
     private String enterTime;
     private String exitTime;
@@ -268,6 +272,8 @@ public class MainActivity extends BaseActivity {
 
         mesTypeLayout=findViewById(R.id.mesTypeLayout);
 
+        marqueeLayout=findViewById(R.id.marqueeLayout);
+
         listViewMessages = findViewById(R.id.list_view_messages);
 
         btnCancelRefer.setOnClickListener(new View.OnClickListener() {
@@ -356,13 +362,12 @@ public class MainActivity extends BaseActivity {
                         public void onClick(View v) {
                             String inputText=inputMsg.getText().toString();
                             String replyText="";
-                            if(referLayout.getVisibility()==VISIBLE){
-
+                            if(referLayout.getVisibility()==VISIBLE){//if it is a reply
                                 clickedItem.setHasReply(true);
                                 repliedItem=clickedItem;
-
-//                                clickedItem.setContent(replyText);
-//                                adapter2.notifyDataSetChanged();
+                            }
+                            if(isMarquee){
+                                inputText="[Marquee]:"+inputText;
                             }
                             time = String.valueOf(new Date().getTime());
                             mid=uid+currTime;
@@ -371,9 +376,7 @@ public class MainActivity extends BaseActivity {
 
                             inputMsg.setText("");
                             referLayout.setVisibility(View.INVISIBLE);
-
-
-
+                            isMarquee=false;
                         }
                     });
                 }
@@ -833,10 +836,14 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void run() {
                         if(!c.isReply()){
-                            listContent.add(c);
-                            adapter2.notifyDataSetChanged();
-                        }
+                            if(c.getContent().startsWith("[Marquee]:")){
+                                setMarqueeLayout(c);
+                            }else{
+                                listContent.add(c);
+                                adapter2.notifyDataSetChanged();
+                            }
 
+                        }
 
                         Log.e("MainActivity","index of c is "+listContent.indexOf(c));
                        // updatedItem(listContent.size()-1);
@@ -847,6 +854,34 @@ public class MainActivity extends BaseActivity {
             }
         }).start();
 
+    }
+
+    private void setMarqueeLayout(Content c){
+        CircleImageView imageSend =marqueeLayout.findViewById(R.id.chat_item_header);
+        int i = Integer.parseInt(c.getHeadImage());
+        imageSend.setImageResource(i);
+        TextView txtlblMsgFrom = marqueeLayout.findViewById(R.id.lblMsgFrom);
+        txtlblMsgFrom.setText(c.getUserName());
+        TextView txtMsg =  marqueeLayout.findViewById(R.id.txtMsg);
+        txtMsg.setText(c.getContent().substring(10));
+        marqueeLayout.setVisibility(VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        marqueeLayout.setVisibility(View.GONE);
+                    }
+                });
+
+            }
+        }).start();
     }
 
     private void updatedItem(int position){
@@ -1051,6 +1086,7 @@ public class MainActivity extends BaseActivity {
 
 
     public void Picture(View view) {
+        mesTypeLayout.setVisibility(View.GONE);
 // 激活系统图库，选择一张图片
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
@@ -1070,6 +1106,7 @@ public class MainActivity extends BaseActivity {
 
     public void Marquee(View view){
         mesTypeLayout.setVisibility(View.GONE);
+        isMarquee=true;
     }
 
 
@@ -1670,6 +1707,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void Camera(View view) {
+        mesTypeLayout.setVisibility(View.GONE);
         checkCameraPermission();
     }
 

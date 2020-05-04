@@ -10,6 +10,53 @@
 
 
     <include layout="@layout/layout_head_back_title"/>
+    <LinearLayout
+        android:id="@+id/marqueeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lightOrange"
+        android:visibility="gone"
+        android:paddingHorizontal="10dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/lblMsgFrom"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="user name"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="@color/lblFromName"
+                android:textSize="8dp"
+                android:textStyle="italic"
+                />
+            <com.example.weahen.wstest.widget.CircleImageView
+                android:id="@+id/chat_item_header"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentLeft="true"
+                android:scaleType="centerInside"
+                android:layout_gravity="center_horizontal"
+                android:src="@mipmap/ic_head_default_left"
+                />
+        </LinearLayout>
+
+        <com.example.weahen.wstest.widget.MarqueeTextView
+            android:id="@+id/txtMsg"
+            android:ellipsize="marquee"
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:singleLine="true"
+            android:text="这里是商家广告位，以跑马灯的形式展现。。。。。"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"/>
+</LinearLayout>
+
 
     <com.example.weahen.wstest.Model.RefreshableView
         android:layout_below="@+id/toolbar"
