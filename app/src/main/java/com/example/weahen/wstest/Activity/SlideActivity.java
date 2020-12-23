@@ -161,23 +161,13 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 Log.e("这里是json",json);
                 Log.e("json.length",json.length()+"");
 
-
                 if(json.length()==0){
                     showDialog();//服务器返回的列表为空，弹窗提示用户换个位置重新刷新
                 }
 
-
-
                 try {
                     SQLiteDatabase dbw = myDbHelper.getWritableDatabase();
                     JSONArray been = new JSONArray(json);
-//                    name[0]="name1";
-//                    path[0] = "path1";
-//                    ID[0] = 1;
-//                    RESERVE[0] = 2;
-//                    FIELD[0] = "field";
-//                    location[0] = "location1";
-
                     for (int i = 0; i < been.length(); i++) {
                         JSONObject TopicListBean = been.getJSONObject(i);
                         name[i] = TopicListBean.getString("name");
@@ -320,8 +310,19 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               ArrayList<String> pic_list = new ArrayList<>();
                 Intent intent = new Intent(SlideActivity.this, FunctionActivity.class);
                 //给functionActivity传值，传点击的聊天室的信息
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+
+                        getImg(position,pic_list);
+
+                    }
+                }).start();
+
                 Bundle bundle = new Bundle();
                 bundle.putInt("reserve", RESERVE[position]);
                 bundle.putString("path", path[position]);
@@ -329,6 +330,9 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 bundle.putInt("ID", ID[position]);
                 bundle.putString("location", location[position]);
                 bundle.putString("name", name[position]);
+                bundle.putStringArrayList("pic_list",pic_list);
+
+
 
                 intent.putExtra("bun", bundle);
 
@@ -343,8 +347,76 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
 
         }
+        //从接口获取商家图片信息。url：/getRoom_ADList
+    String getMacresult = "";
+    public  ArrayList<String> getImg(int position,ArrayList<String>res){
+        //ArrayList<String> res = new ArrayList<>();
+        String murl="http://39.106.39.49:8888/getRoom_ADList";
+        try{
+            URL url = new URL(murl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            conn.setInstanceFollowRedirects(true);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+
+            String content = "path=" + URLEncoder.encode(path[position], "utf-8");
+
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("Connection", "keep-alive");
+            conn.setRequestProperty("Content-Length", String.valueOf(content.getBytes().length));
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0");
+
+            conn.setDoOutput(true); // 发送POST请求必须设置允许输出
+            conn.setDoInput(true);
+
+            conn.connect();
+
+            OutputStream os = conn.getOutputStream();
+            os.write(content.getBytes());
+            os.flush();
 
 
+            if (conn.getResponseCode() == 200) {
+                // 获取响应的输入流对象
+                InputStream is = conn.getInputStream();
+                // 创建字节输出流对象
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // 定义读取的长度
+                int len = 0;
+                //定义缓冲区
+                byte buffer[] = new byte[1024];
+                // 按照缓冲区的大小，循环读取
+                while ((len = is.read(buffer)) != -1) {
+                    // 根据读取的长度写入到os对象中
+                    baos.write(buffer, 0, len);
+                }                // 释放资源
+                is.close();
+                baos.close();
+                // 返回字符串
+                getMacresult = new String(baos.toByteArray());
+                Log.e("MY Result", getMacresult);
+                //JSONObject jObj = new JSONObject(getMacresult);
+                JSONArray job = new JSONArray(getMacresult);
+                for(int i=0;i<job.length();++i)
+                {
+                    JSONObject temp = job.getJSONObject(i);
+                    res.add(temp.getString("pic_name"));
+                }
+
+
+            } else {
+                Log.e("失败了", "失败了");
+            }
+        }catch(Exception e){
+
+            e.printStackTrace();
+        }
+        return res;
+    }
     @Override
 
     public void onBackPressed() {

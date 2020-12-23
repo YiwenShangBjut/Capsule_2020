@@ -272,8 +272,6 @@ public class MainActivity extends BaseActivity {
 
         mesTypeLayout=findViewById(R.id.mesTypeLayout);
 
-        marqueeLayout=findViewById(R.id.marqueeLayout);
-
         listViewMessages = findViewById(R.id.list_view_messages);
 
         btnCancelRefer.setOnClickListener(new View.OnClickListener() {
@@ -1106,7 +1104,6 @@ public class MainActivity extends BaseActivity {
 
     public void Marquee(View view){
         mesTypeLayout.setVisibility(View.GONE);
-        isMarquee=true;
     }
 
 
