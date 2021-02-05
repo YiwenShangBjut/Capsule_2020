@@ -18,7 +18,10 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -37,11 +40,13 @@ import com.example.weahen.wstest.Adapter.MyListAdapter;
 import com.example.weahen.wstest.Config.GlobalConfig;
 import com.example.weahen.wstest.Config.URLConfig;
 import com.example.weahen.wstest.Model.ChatRoom;
+import com.example.weahen.wstest.Model.Merchant;
 import com.example.weahen.wstest.Model.RefreshableView;
 import com.example.weahen.wstest.Model.Tidings;
 import com.example.weahen.wstest.MyApplication;
 import com.example.weahen.wstest.R;
 import com.example.weahen.wstest.Utils.AppUtils;
+import com.example.weahen.wstest.Utils.BitmapUtil;
 import com.example.weahen.wstest.Utils.NetUtils;
 import com.example.weahen.wstest.Utils.ScreenUtils;
 import com.example.weahen.wstest.Utils.SharedPrefsStrListUtil;
@@ -132,9 +137,16 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
     private MyDbOpenHelper myDbHelper;
     ArrayList<ChatRoom> chatRoomList;
-//    ArrayList<String> roomNameList;
+    //    ArrayList<String> roomNameList;
 //    ArrayList<String> roomIdList;
     private AlertDialog historyDialog;
+
+    //商家属性
+    private ArrayList<Merchant> merchantList = new ArrayList<>();
+    private ArrayList<String> titleList = new ArrayList<>();
+    private ArrayList<String> nameList = new ArrayList<>();
+    private ArrayList<String> desList = new ArrayList<>();
+
 
 
 //    Handler hisHandler=new Handler(){
@@ -151,7 +163,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 //        }
 //    };
 
-      //解析服务器返回的json
+    //解析服务器返回的json
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -199,6 +211,8 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
                             myDbHelper.insertRoomData(contentValues, dbw);
                             getRoomList();
+                        } else {
+                            Log.e("RoomExistErro","!!!!!");
                         }
 
                     }
@@ -208,6 +222,20 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
                     e.printStackTrace();
                 }
+            }else if(msg.what == 280) {
+
+                int position = msg.arg1;
+                Intent intent = new Intent(SlideActivity.this, FunctionActivity.class);
+                intent.putParcelableArrayListExtra("merchantList", merchantList);
+                intent.putExtra("reserve", RESERVE[position]);
+                intent.putExtra("path", path[position]);
+                intent.putExtra("field", FIELD[position]);
+                intent.putExtra("ID", ID[position]);
+                intent.putExtra("location", location[position]);
+                intent.putExtra("name", name[position]);
+                startActivity(intent);
+                Log.e("GetPic-->merchantList",String.valueOf(merchantList.size()));
+
             }
         }
     };
@@ -215,7 +243,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     private boolean ifRoomExist(String id){
         for(int i=0;i<chatRoomList.size();i++){
             if(id.equals(chatRoomList.get(i).getRoomId())){
-                Log.e("IfRoomExist","Room exist, room id is "+chatRoomList.get(i).getRoomId());
+                Log.e("Slide-IfRoomExist","Room exist, room id is "+chatRoomList.get(i).getRoomId());
                 return true;
             }
         }
@@ -251,6 +279,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_slide);
 
         myDbHelper = MyDbOpenHelper.getInstance(this);
+
 
 
         getRoomList();
@@ -306,119 +335,121 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         }, 0);
 
 
+        //聊天室列表的响应功能
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-               ArrayList<String> pic_list = new ArrayList<>();
-                Intent intent = new Intent(SlideActivity.this, FunctionActivity.class);
-                //给functionActivity传值，传点击的聊天室的信息
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
 
-
-                        getImg(position,pic_list);
-
-                    }
-                }).start();
-
-                Bundle bundle = new Bundle();
-                bundle.putInt("reserve", RESERVE[position]);
-                bundle.putString("path", path[position]);
-                bundle.putString("field", FIELD[position]);
-                bundle.putInt("ID", ID[position]);
-                bundle.putString("location", location[position]);
-                bundle.putString("name", name[position]);
-                bundle.putStringArrayList("pic_list",pic_list);
-
-
-
-                intent.putExtra("bun", bundle);
-
-                startActivity(intent);
+                merchantList.clear();
+                new GetPic(position).start();
 
             }
         });
         //chatContentDao= MyApplication.getInstances().getDaoSession().getChatContentDao();
-       // chatContents = chatContentDao.loadAll();
+        //chatContents = chatContentDao.loadAll();
 
-//        getRoomList();
-
-
-        }
-        //从接口获取商家图片信息。url：/getRoom_ADList
-    String getMacresult = "";
-    public  ArrayList<String> getImg(int position,ArrayList<String>res){
-        //ArrayList<String> res = new ArrayList<>();
-        String murl="http://39.106.39.49:8888/getRoom_ADList";
-        try{
-            URL url = new URL(murl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setUseCaches(false);
-            conn.setInstanceFollowRedirects(true);
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-
-            String content = "path=" + URLEncoder.encode(path[position], "utf-8");
-
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestProperty("Connection", "keep-alive");
-            conn.setRequestProperty("Content-Length", String.valueOf(content.getBytes().length));
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0");
-
-            conn.setDoOutput(true); // 发送POST请求必须设置允许输出
-            conn.setDoInput(true);
-
-            conn.connect();
-
-            OutputStream os = conn.getOutputStream();
-            os.write(content.getBytes());
-            os.flush();
-
-
-            if (conn.getResponseCode() == 200) {
-                // 获取响应的输入流对象
-                InputStream is = conn.getInputStream();
-                // 创建字节输出流对象
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                // 定义读取的长度
-                int len = 0;
-                //定义缓冲区
-                byte buffer[] = new byte[1024];
-                // 按照缓冲区的大小，循环读取
-                while ((len = is.read(buffer)) != -1) {
-                    // 根据读取的长度写入到os对象中
-                    baos.write(buffer, 0, len);
-                }                // 释放资源
-                is.close();
-                baos.close();
-                // 返回字符串
-                getMacresult = new String(baos.toByteArray());
-                Log.e("MY Result", getMacresult);
-                //JSONObject jObj = new JSONObject(getMacresult);
-                JSONArray job = new JSONArray(getMacresult);
-                for(int i=0;i<job.length();++i)
-                {
-                    JSONObject temp = job.getJSONObject(i);
-                    res.add(temp.getString("pic_name"));
-                }
-
-
-            } else {
-                Log.e("失败了", "失败了");
-            }
-        }catch(Exception e){
-
-            e.printStackTrace();
-        }
-        return res;
+        // getRoomList();
     }
-    @Override
 
+
+    //获取该聊天室的商家信息
+    class GetPic extends Thread {
+
+        String murl="http://39.106.39.49:8888/getRoom_ADList";
+        String getMacresult = "";
+        int position;
+
+        public GetPic(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try{
+                URL url = new URL(murl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+                conn.setUseCaches(false);
+                conn.setInstanceFollowRedirects(true);
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+
+                String content = "path=" + URLEncoder.encode(path[position], "utf-8");
+
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("Connection", "keep-alive");
+                conn.setRequestProperty("Content-Length", String.valueOf(content.getBytes().length));
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0");
+
+                conn.setDoOutput(true); // 发送POST请求必须设置允许输出
+                conn.setDoInput(true);
+
+                conn.connect();
+
+                OutputStream os = conn.getOutputStream();
+                os.write(content.getBytes());
+                os.flush();
+
+                Log.e("Code", String.valueOf(conn.getResponseCode()));
+
+                if (conn.getResponseCode() == 200) {
+
+                    // 获取响应的输入流对象
+                    InputStream is = conn.getInputStream();
+                    // 创建字节输出流对象
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    // 定义读取的长度
+                    int len = 0;
+                    //定义缓冲区
+                    byte buffer[] = new byte[1024];
+                    // 按照缓冲区的大小，循环读取
+                    while ((len = is.read(buffer)) != -1) {
+                        // 根据读取的长度写入到os对象中
+                        baos.write(buffer, 0, len);
+                    }
+                    // 释放资源
+                    os.close();
+                    is.close();
+                    baos.close();
+                    // 返回字符串
+                    getMacresult = new String(baos.toByteArray());
+                    Log.e("Slide---getMacresult：", getMacresult);
+                    //JSONObject jObj = new JSONObject(getMacresult);
+                    JSONArray job = new JSONArray(getMacresult);
+                    for(int i=0;i<job.length();++i)
+                    {
+                        JSONObject temp = job.getJSONObject(i);
+                        Merchant merchant = new Merchant();
+                        merchant.setPath(temp.getString("path"));
+                        merchant.setTitle(temp.getString("title"));
+                        merchant.setPicName(temp.getString("pic_name"));
+                        merchant.setDescription(temp.getString("describe"));
+                        merchantList.add(merchant);
+                    }
+
+                    Message message = new Message();
+                    message.what = 280;
+
+                    message.arg1 = position;
+                    handler.sendMessage(message);
+
+                } else {
+                    Log.e("GetPic线程类", "失败了");
+                }
+            }catch(Exception e){
+
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
+
+    @Override
     public void onBackPressed() {
 
 
@@ -487,7 +518,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-              //  myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
+                //  myDbHelper.deleteRoomFromTable(chatRoomList.get(position).getRoomId());
                 deleteHistory(position);
 //                chatRoomList.remove(position);
 //                adapter.notifyDataSetChanged();
@@ -558,7 +589,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 intent.putExtra("roomName", checkedRoomName);
                 historyDialog.dismiss();
                 startActivity(intent);
-               // clickedRoom=chatContents.get(position);
+                // clickedRoom=chatContents.get(position);
             }
         });
 
@@ -607,7 +638,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
 
         } else if (id == R.id.checkupdate) {
 
-           showDialog_restart();
+            showDialog_restart();
 
 
         } else if (id == R.id.set) {
@@ -641,7 +672,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     }
 
 
-     //是否退出程序
+    //是否退出程序
     AlertDialog builder = null;
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -651,15 +682,15 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                     .setMessage("您将退出程序")
                     .setPositiveButton("确定",
                             new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    SlideActivity.this.finish();
-                }
-            }).setNegativeButton("取消",
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    SlideActivity.this.finish();
+                                }
+                            }).setNegativeButton("取消",
                             new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    builder.dismiss();
-                }
-            }).show();
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    builder.dismiss();
+                                }
+                            }).show();
         }
         return true;
     }
@@ -698,7 +729,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                 macAddress = getNewMac();
                 Log.e("WSWSWSWS", "COME HERE------------macAddress！！！！" + macAddress);
 
-               //给服务器发当前正连接的mac地址
+                //给服务器发当前正连接的mac地址
                 String content = "mac=" + URLEncoder.encode(macAddress, "utf-8");
                 out.writeBytes(content);
                 out.flush();
@@ -719,7 +750,7 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
                         sb.append(new String(bytes, 0, i));
                     }
 
-                   Log.e("这里是sb",sb.toString()+" -------------------------------string buffer");//服务器返回的聊天室的json列表
+                    Log.e("这里是sb",sb.toString()+" -------------------------------string buffer");//服务器返回的聊天室的json列表
 
                     Message message = new Message();
                     message.what = 270;

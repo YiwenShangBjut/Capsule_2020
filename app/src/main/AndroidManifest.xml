@@ -62,6 +62,7 @@
         <activity android:name=".Activity.BusinessNumber2Activity" />
         <activity android:name=".Activity.PersonalizedActivity" />
         <activity android:name=".Activity.ChangeHeadImageActivity"></activity>
+        <activity android:name=".Activity.MerchantActivity" />
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.weahen.wstest"
