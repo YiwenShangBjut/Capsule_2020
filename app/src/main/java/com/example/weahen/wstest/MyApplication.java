@@ -17,7 +17,7 @@ import org.xutils.x;
 public class MyApplication extends Application {
     public static Context mContext;
     private static DbManager.DaoConfig mDaoConfig;
-    public static Application		mApplication;
+    public static Application mApplication;
     private static DbManager sDbManager;
 
     private static  DaoMaster.DevOpenHelper helper;
@@ -33,7 +33,7 @@ public class MyApplication extends Application {
         x.Ext.setDebug(true);
         mContext = this;
         mApplication=this;
-     //   setDatabase();
+        //   setDatabase();
     }
 
     public static DbManager.DaoConfig getDaoConfig() {
@@ -72,6 +72,11 @@ public class MyApplication extends Application {
             sDbManager = x.getDb(getDaoConfig());
         }
         return sDbManager;
+    }
+
+    // 将获取到的Context进行返回
+    public static Context getContext() {
+        return mContext;
     }
 
 //    public void setDatabase(){

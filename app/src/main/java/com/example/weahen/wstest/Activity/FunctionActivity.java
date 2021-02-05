@@ -1,7 +1,6 @@
 package com.example.weahen.wstest.Activity;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,12 +8,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,14 +36,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+import com.example.weahen.wstest.Adapter.MerchantAdapter;
 import com.example.weahen.wstest.BaseActivity;
 import com.example.weahen.wstest.Model.ChatRoom;
+import com.example.weahen.wstest.Model.Merchant;
 import com.example.weahen.wstest.MyApplication;
 import com.example.weahen.wstest.R;
-import com.example.weahen.wstest.db.ChatContent;
-import com.example.weahen.wstest.db.ChatContentDao;
-import com.example.weahen.wstest.db.DaoMaster;
-import com.example.weahen.wstest.db.DaoSession;
+import com.example.weahen.wstest.Utils.BitmapUtil;
+import com.example.weahen.wstest.Utils.HttpUtils;
+import com.example.weahen.wstest.Utils.MyBitmapUtils;
+import com.example.weahen.wstest.Utils.NetCacheUtils;
 import com.example.weahen.wstest.db.MyDbOpenHelper;
 import com.example.weahen.wstest.widget.SetPermissionDialog;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -48,25 +59,30 @@ import com.youth.banner.Transformer;
 import com.youth.banner.listener.OnBannerListener;
 import com.youth.banner.loader.ImageLoader;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import io.reactivex.functions.Consumer;
 import ua.naiksoftware.stomp.StompClient;
 
-import static com.example.weahen.wstest.Activity.MainActivity.readPictureDegree;
-import static com.example.weahen.wstest.Activity.MainActivity.rotateImageView;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ID;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_NAME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.TABLE_NAME_ROOM;
 
-//这是从聊天室列表进入具体聊天室的中间页面，显示聊天按钮和其他聊天室所在区域信息
+
+/**
+ * 这是从聊天室列表进入具体聊天室的中间页面，显示聊天按钮和其他聊天室所在区域信息
+ */
 public class FunctionActivity extends BaseActivity implements OnBannerListener {
+
+    protected static final String TAG = "FunctionActivity";
 
     //轮播图相关
     private Banner mBanner;
@@ -75,21 +91,13 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
     private ArrayList<String> imageTitle;
     private StompClient mStompClient;
 
-
-    //功能按钮
-    Button button1_1;
-    ImageView button2_1;
-
-    TextView textView1_1;
-    TextView textView2_1;
-
+    //聊天按钮
+    private Button button1;
 
     int reserve;
     String path;
-
     String field;
     String location;
-
     int ID;
     String name;
 
@@ -103,55 +111,79 @@ public class FunctionActivity extends BaseActivity implements OnBannerListener {
     private MyDbOpenHelper myDbHelper;
     ArrayAdapter<ChatRoom> adapter;
 
-ArrayList<String> pic_list;
+    private AppBarLayout mAppBarLayout;
+    private RecyclerView recyclerView;
+    //商家属性
+    private List<Bitmap> bitmapArrayList = new ArrayList<>();
+
+    private List<Merchant> merchantList = new ArrayList<>();
+
+    private MerchantAdapter merchantAdapter;
+
+    private MyBitmapUtils myBitmapUtils;
+
+
+    //处理商家信息的异步消息
+    private Handler handlerImg = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if(msg.what == 0) {
+                ArrayList<Bitmap> bitmapList = (ArrayList<Bitmap>) msg.obj;
+                recyclerView = findViewById(R.id.recycler_View);
+                GridLayoutManager layoutManager = new GridLayoutManager(MyApplication.getContext(), 2);
+                recyclerView.setLayoutManager(layoutManager);
+                merchantAdapter = new MerchantAdapter(merchantList, bitmapList);
+                recyclerView.setAdapter(merchantAdapter);
+
+            }
+
+        }
+
+    };
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_function);
+        setContentView(R.layout.activity_function2);
         myDbHelper = MyDbOpenHelper.getInstance(this);
         getRoomList();
 
-        Intent intent = getIntent();
-        Bundle bundle = intent.getBundleExtra("bun");
-        reserve = bundle.getInt("reserve");
-        path = bundle.getString("path");
-        field = bundle.getString("field");
-        location = bundle.getString("location");
-        name = bundle.getString("name");
-        pic_list=bundle.getStringArrayList("pic_list");
-        ID=bundle.getInt("ID");
-        //根据slidectivity返回数据的数量开线程，循环遍历接口返回的图片流数据，得到Bitmap
-    for(int i=0;i<pic_list.size();i++){
-        GetPicture dp=new GetPicture(path,pic_list.get(i));
-    dp.start();
-    try {
-        dp.join();
-    } catch (InterruptedException e) {
-        e.printStackTrace();
-    }
-    Bitmap res = dp.getimg();
-    res.getHeight();
-}
+        myBitmapUtils = new MyBitmapUtils(MyApplication.getContext());
 
+        Intent intent = getIntent();
+        reserve = intent.getIntExtra("reserve",0);
+        path = intent.getStringExtra("path");
+        field = intent.getStringExtra("field");
+        location = intent.getStringExtra("location");
+        name = intent.getStringExtra("name");
+        ID = intent.getIntExtra("ID", 0);
+        merchantList = intent.getParcelableArrayListExtra("merchantList");
+
+        Log.e("Function---","---path:"+path+"---name:"+name+"---field:"+field+"---location:"+location);
+        Log.e("merchantList----", merchantList.size()+"");
+
+
+        //加载轮播图
         initTitle(name);
         initData();
         initView();
 
-        button1_1 = findViewById(R.id.button1_1);
-        button2_1 = findViewById(R.id.img_show_shopinfo1);
-        textView1_1 = findViewById(R.id.text1_1);
-        textView2_1 = findViewById(R.id.text2_1);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        button1 = findViewById(R.id.button1);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         toolbar.setTitle("");
         toolbar.setTitleTextColor(1);
-        //button2_1.setText("hello world");
+
+
 
         //field= 0  意思是这是合生汇那种大群，进去以后还有小群
         if(field.equals(0) ) {
-            button1_1.setOnClickListener(new View.OnClickListener() {
+            button1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(FunctionActivity.this, RefreshViewActivity.class);
@@ -163,7 +195,7 @@ ArrayList<String> pic_list;
                 }
             });
         }else {    //field 不为 0  意思是这是星巴克那种小群，进去以后直接是聊天室
-            button1_1.setOnClickListener(new View.OnClickListener() {
+            button1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(FunctionActivity.this, MainActivity.class);
@@ -180,116 +212,78 @@ ArrayList<String> pic_list;
 
         }
 
-//        textView1_1.setText("聊天");
+
+        //商家部分
+        new GetPicture(merchantList).start();
 
 
-        //reserve为1或2意思是可以取号，reserve为0意思是不能取号
-        Log.e("这里是reserve", reserve + "" );
-        if ((reserve == 1) || (reserve == 2)) {
-            button2_1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(FunctionActivity.this, MyNumberActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("path", path);
-                    bundle.putInt("reserve", reserve);
-                    intent.putExtra("bun", bundle);
-                    startActivity(intent);
+        mAppBarLayout = findViewById(R.id.appBarLayout);
+        //悬浮按钮
+        FloatingActionButton fab = findViewById(R.id.toTop);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //返回顶部
+                CoordinatorLayout.Behavior behavior =
+                        ((CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams()).getBehavior();
+                if (behavior instanceof AppBarLayout.Behavior) {
+                    AppBarLayout.Behavior appBarLayoutBehavior = (AppBarLayout.Behavior) behavior;
+                    int topAndBottomOffset = appBarLayoutBehavior.getTopAndBottomOffset();
+                    if (topAndBottomOffset != 0) {
+                        appBarLayoutBehavior.setTopAndBottomOffset(0);
+                    }
                 }
-            });
-            textView2_1.setText("取号");
-        }
+                recyclerView.scrollToPosition(0);
 
-
-//        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "chat.db");
-//        SQLiteDatabase db = helper.getWritableDatabase();
-//        DaoMaster daoMaster = new DaoMaster(db);
-//        DaoSession daoSession = daoMaster.newSession();
-//        chatContentDao = daoSession.getChatContentDao();
-
-        //chatContentDao= MyApplication.getInstances().getDaoSession().getChatContentDao();
-        // chatContents = chatContentDao.loadAll();
-        //outputChatList();
+                Toast.makeText(FunctionActivity.this, "置顶", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
-//从后台获取照片流数据，接口url：/get_AD_Img/{path}/{name}
+
+    //从后台获取商家照片流数据，接口url：/get_AD_Img/{path}/{pic_name}
+    // http://39.106.39.49:8888/get_AD_Img/1478602/猫2.jpg
     class GetPicture extends Thread {
-        String pic_path;
-        String pic_name;
-        Bitmap m;
-        Bitmap getimg(){return m;}
-        GetPicture(String path,String name)
-        {
-            this.pic_path = path.substring(1);
-            this.pic_name = name;
+        List<Merchant> merchantList;
+
+        GetPicture(List<Merchant> merchants) {
+            this.merchantList = merchants;
         }
+
         @Override
         public void run() {
             super.run();
 
             try {
+                Log.e("GetPicture---------", merchantList.size()+"");
 
-                String path = "http://39.106.39.49:8888/get_AD_Img/" + pic_path+"/"+pic_name;
-                //2:把网址封装为一个URL对象
-                URL url = new URL(path);
-                //3:获取客户端和服务器的连接对象，此时还没有建立连接
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                //4:初始化连接对象
-                conn.setRequestMethod("POST");
-                //设置连接超时
-                conn.setConnectTimeout(8000);
-                //设置读取超时
-                conn.setReadTimeout(8000);
-                //5:发生请求，与服务器建立连接
-                conn.connect();
-                //如果响应码为200，说明请求成功
-                Log.e("responseCode", conn.getResponseCode() + "");
+                for (int i = 0; i < merchantList.size(); i++) {
 
-                if (conn.getResponseCode() == 200) {
-                    //获取服务器响应头中的流
-                    InputStream is = conn.getInputStream();
-                    //读取流里的数据，构建成bitmap位图
-                    Bitmap bm = BitmapFactory.decodeStream(is);
+                    Merchant merchant = merchantList.get(i);
+                    String path = "http://39.106.39.49:8888/get_AD_Img" +
+                            merchant.getPath() + "/" + merchant.getPicName();
 
-                    int degree = readPictureDegree(path);
-                    Log.e("接收图片的degree", degree + "");
-                     m = rotateImageView(degree, bm);
-
-//                    Message msg = new Message();
-//                    msg.obj = m;
-                    //handlerRecv.sendMessage(msg);
-
+                    Bitmap bm = myBitmapUtils.getBitmap(path); // 三级缓存
+                    bitmapArrayList.add(bm);
                 }
+
+                //发送更新UI的消息
+                Message msg = new Message();
+                msg.what = 0;
+                msg.obj = bitmapArrayList;
+                handlerImg.sendMessage(msg);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-
     }
 
-    //设置图片展示
-    public  void getImg(){
-    String murl="http://39.106.39.49:8888/getRoom_ADList";
-    try{
-        URL url = new URL(murl);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        conn.setUseCaches(false);
-        conn.setInstanceFollowRedirects(true);
-        conn.setConnectTimeout(5000);
-        conn.setReadTimeout(5000);
 
-        conn.connect();
-
-    }catch(Exception e){
-
-        e.printStackTrace();
-    }
-    }
-
+    /**
+     * 删除聊天室
+     * @param position
+     */
     private void showDeleteDialog(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FunctionActivity.this);
         builder.setTitle("删除此聊天室");
@@ -314,7 +308,6 @@ ArrayList<String> pic_list;
     }
 
     @Override
-
     public boolean onCreateOptionsMenu(Menu menu) {
 
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -327,9 +320,7 @@ ArrayList<String> pic_list;
 
 
     @Override
-
     public boolean onOptionsItemSelected(MenuItem item) {
-
 
         int id = item.getItemId();
 
@@ -510,6 +501,9 @@ ArrayList<String> pic_list;
                     }
                 });
     }
+
+
+
     private boolean ifRoomExist(String id){
         for(int i=0;i<chatRoomList.size();i++){
             if(id.equals(chatRoomList.get(i).getRoomId())){
