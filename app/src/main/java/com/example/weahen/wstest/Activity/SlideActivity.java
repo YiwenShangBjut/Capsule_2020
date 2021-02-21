@@ -1,5 +1,6 @@
 package com.example.weahen.wstest.Activity;
 
+import static com.example.weahen.wstest.MyApplication.getContext;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.TABLE_NAME_CHAT;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDTIME;
 import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_STARTTIME;
@@ -14,6 +15,7 @@ import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ID;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -77,6 +79,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.net.wifi.WifiManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -613,6 +617,10 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
+    public static WifiManager getWifiManager(Context context) {
+        return context == null ? null : (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    }
+
 
     @Override
 
@@ -662,6 +670,14 @@ public class SlideActivity extends AppCompatActivity implements NavigationView.O
             startActivity(intent);
 
 
+        }else if(id==R.id.mobile_data_traffic){
+
+            WifiManager wifiManager = getWifiManager(getContext());
+            if (wifiManager.isWifiEnabled()) {
+                wifiManager.setWifiEnabled(false);
+            } else {
+                wifiManager.setWifiEnabled(true);
+            }
         }
 
 

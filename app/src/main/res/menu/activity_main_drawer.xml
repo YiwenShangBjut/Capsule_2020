@@ -62,6 +62,14 @@
 
                 android:title="给我们发邮件" />
 
+            <item
+
+                android:id="@+id/mobile_data_traffic"
+
+
+
+                android:title="切换为移动数据" />
+
         </menu>
 
     </item>
