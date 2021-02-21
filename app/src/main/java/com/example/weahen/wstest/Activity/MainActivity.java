@@ -1,6 +1,7 @@
 package com.example.weahen.wstest.Activity;
 
 import static android.view.View.VISIBLE;
+import static com.example.weahen.wstest.MyApplication.getContext;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_AVATARID;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_NICKNAME;
 import static com.example.weahen.wstest.db.DBContract.ChatEntry.COLUMN_NAME_SHACODE;
@@ -20,6 +21,7 @@ import static com.example.weahen.wstest.db.DBContract.RoomEntry.COLUMN_NAME_ENDT
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -35,7 +37,9 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -245,11 +249,44 @@ public class MainActivity extends BaseActivity {
     };
     //  private ChatContentDao chatContentDao;
     private String nick;
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    public static WifiManager getWifiManager(Context context) {
+        return context == null ? null : (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    }
+
+    public boolean isCurrentWiFiCanBeScanned() {
+        // 扫描的热点数据
+        WifiManager mWifiManager = getWifiManager(getContext());
+        List<ScanResult> resultList;
+        // 开始扫描热点
+        mWifiManager.startScan();
+        resultList = mWifiManager.getScanResults();
+        ArrayList<String> ssids = new ArrayList<String>();
+        WifiInfo wifiInfo;
+        wifiInfo = mWifiManager.getConnectionInfo();
+        Log.e("MainActivity", " current wifi info: "+wifiInfo.toString());
+        Log.e("MainActivity", " current wifi SSID: "+wifiInfo.getSSID());
+        boolean flag=false;
+        if (resultList != null) {
+            for (ScanResult scan : resultList) {
+                //ssids.add('"'+scan.SSID+'"');// 遍历数据，取得ssid数据集
+                if(wifiInfo.getSSID().equals('"'+scan.SSID+'"')){
+                    //Log.e("MainActivity", "find SSID!  "+scan.SSID);
+                    flag=true;
+                }
+                //Log.e("MainActivity", "SSID: "+ssids.toString());
+            }
+        }
+
+        return flag;
+    }
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("MainActivity", "onCreate");
+        isCurrentWiFiCanBeScanned();
         setContentView(R.layout.activity_main);
         enter = true;
 
